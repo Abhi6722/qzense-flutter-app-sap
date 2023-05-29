@@ -33,11 +33,11 @@ class MyLogoutButtonState extends State<MyLogoutButton> {
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: Text('Logout'),
-            content: Text('Are you sure you want to logout?'),
+            title: const Text('Logout'),
+            content: const Text('Are you sure you want to logout?'),
             actions: <Widget>[
               ElevatedButton(
-                style: ButtonStyle(),
+                style: const ButtonStyle(),
                 child: const Text('Yes'),
                 onPressed: () {
                   setState(() {
@@ -45,11 +45,11 @@ class MyLogoutButtonState extends State<MyLogoutButton> {
                   });
                   userLogout ? _removeTokens() : null;
                   Navigator.popUntil(context, (route) => false);
-                  Navigator.pushNamed((context), Login_page);
+                  Navigator.pushNamed((context), loginPage);
                 },
               ),
               ElevatedButton(
-                style: ButtonStyle(),
+                style: const ButtonStyle(),
                 child: const Text('No'),
                 onPressed: () {
                   setState(() {

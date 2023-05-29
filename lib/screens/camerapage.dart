@@ -27,20 +27,13 @@ class CameraApp extends StatefulWidget {
 class _CameraAppState extends State<CameraApp> {
   static final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
   bool cameraOn = true;
-  // String mlModel = 'BANANA';
-  // String part = 'BANANA';
-
   late AndroidDeviceInfo androidInfo;
   late IosDeviceInfo iosInformation;
   late int R, G, B;
   dynamic size;
   bool isRightHanded = true;
-
   XFile? imageFile;
-
   bool isBanana = false;
-
-  // bool notCropped = false;
   File? croppedImage;
   int predictionNumeric = -1;
   bool flashOn = false;
@@ -72,10 +65,9 @@ class _CameraAppState extends State<CameraApp> {
     });
   }
 
-
   @override
   build(BuildContext context) {
-    size = MediaQuery.of(context).size; // fetch screen size
+    size = MediaQuery.of(context).size;
 
     //for setting default orientation
     SystemChrome.setPreferredOrientations([
@@ -84,6 +76,7 @@ class _CameraAppState extends State<CameraApp> {
     ]);
     //instance of cubit to handle state management
     var provider = BlocProvider.of<PredictionCubit>(context);
+
     // method to implement the logic of camera and calling cubit & api
     void _getImage(ImageSource source) async {
       try {
@@ -102,24 +95,24 @@ class _CameraAppState extends State<CameraApp> {
           });
         }
 
-        //debugPrint('$imageXfile');
-        // code for getting dimention of selected image
+        debugPrint('Image File : $imageXfile');
+        // code for getting dimension of selected image
         File tempImage = File(imageXfile!.path);
         var decodedImage =
             await decodeImageFromList(tempImage.readAsBytesSync());
         if (decodedImage.height != decodedImage.width) {
           //if image is not square then cropper opens else call to api
           croppedImage = (await ImageCropper().cropImage(
-              sourcePath: imageXfile.path,
-              aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
-              compressQuality: 100,
-              maxWidth: 700,
-              maxHeight: 700,
-              compressFormat: ImageCompressFormat.png,
-              // androidUiSettings: AndroidUiSettings(
-              //   lockAspectRatio: true,
-              // )
-              )) as File?;
+            sourcePath: imageXfile.path,
+            aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+            compressQuality: 100,
+            maxWidth: 700,
+            maxHeight: 700,
+            compressFormat: ImageCompressFormat.png,
+            // androidUiSettings: AndroidUiSettings(
+            //   lockAspectRatio: true,
+            // )
+          )) as File?;
           if (croppedImage == null) {
             setState(() {
               cameraOn = true;
@@ -130,14 +123,14 @@ class _CameraAppState extends State<CameraApp> {
             myImagePath = croppedImage!.path;
             cameraOn = true;
           });
-          //method for calling fetchPrediction method of prediction cubit class
 
+          //method for calling fetchPrediction method of prediction cubit class
           await provider
               .fetchPredictions(croppedImage!.path, androidInfo.model,
                   widget.part, hour, androidInfo.brand, widget.mlModel, false)
               .whenComplete(() {
             var mypredictions = provider.state.predictions;
-            Navigator.pushNamed(context, Result_Page, arguments: {
+            Navigator.pushNamed(context, resultPage, arguments: {
               'mlModel': widget.mlModel,
               'part': widget.part,
               'details': mypredictions.action,
@@ -148,20 +141,21 @@ class _CameraAppState extends State<CameraApp> {
               'imagePath': myImagePath,
             });
 
-            //debugPrint('${mypredictions.result}');
+            debugPrint('${mypredictions.result}');
           });
         } else {
           setState(() {
             myImagePath = imageXfile.path;
             cameraOn = true;
           });
+
           await provider
               .fetchPredictions(imageXfile.path, androidInfo.model, widget.part,
                   hour, androidInfo.brand, widget.mlModel, false)
               .whenComplete(() {
             var mypredictions = provider.state.predictions;
             //after calling if there is no error occurs then call automatically to resultpage
-            Navigator.pushNamed(context, Result_Page, arguments: {
+            Navigator.pushNamed(context, resultPage, arguments: {
               'mlModel': widget.mlModel,
               'part': widget.part,
               'details': mypredictions.action,
@@ -172,7 +166,7 @@ class _CameraAppState extends State<CameraApp> {
               'imagePath': myImagePath,
             });
 
-            //debugPrint('${mypredictions.result}');
+            debugPrint('${mypredictions.result}');
           });
         }
       } catch (e) {
@@ -187,10 +181,11 @@ class _CameraAppState extends State<CameraApp> {
     }
 
     return WillPopScope(
-        onWillPop: () async => true,
-        child: SafeArea(
-            child: Stack(children: [
-          Scaffold(
+      onWillPop: () async => true,
+      child: SafeArea(
+        child: Stack(
+          children: [
+            Scaffold(
               appBar: AppBar(
                 backgroundColor: primaryColor,
 
@@ -232,8 +227,8 @@ class _CameraAppState extends State<CameraApp> {
                                       size: const Size(150, 150),
                                       child: ClipOval(
                                           child: Material(
-                                              color:
-                                                  const Color.fromRGBO(14, 80, 95, 1),
+                                              color: const Color.fromRGBO(
+                                                  14, 80, 95, 1),
                                               child: InkWell(
                                                   splashColor:
                                                       Colors.deepOrangeAccent,
@@ -275,8 +270,8 @@ class _CameraAppState extends State<CameraApp> {
                                       child: ClipOval(
                                           clipBehavior: Clip.antiAlias,
                                           child: Material(
-                                              color:
-                                                  const Color.fromRGBO(14, 80, 95, 1),
+                                              color: const Color.fromRGBO(
+                                                  14, 80, 95, 1),
                                               child: InkWell(
                                                   splashColor:
                                                       Colors.deepOrangeAccent,
@@ -322,7 +317,11 @@ class _CameraAppState extends State<CameraApp> {
                   }
                   return Container();
                 },
-              ))
-        ])));
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

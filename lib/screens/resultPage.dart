@@ -113,53 +113,8 @@ class ResultsPageState extends State<ResultsPage> {
     } catch (e) {
       debugPrint(e.toString());
     }
-
-// here Second Method to save it to Gallery
-    // debugPrint('initialPAth:${widget.path}');
-
-    // Uint8List bytes = await File(widget.path).readAsBytes();
-
-    // try {
-    //   //value return by saveImage:-->{filePath: content://media/external/images/media/8636, errorMessage: null, isSuccess: true}
-    //   await ImageGallerySaver.saveImage(bytes,
-    //       name: 'Banana_Predictions/ ${widget.predictionResult} $cdate');
-
-    //     .then((val) {
-    //   if (val['isSuccess'] == true) {
-    //     debugPrint('image Saved');
-    //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-    //       dismissDirection: DismissDirection.down,
-    //       content: Text('Image Saved TO Pictures'),
-    //       elevation: 6.0,
-    //       behavior: SnackBarBehavior.floating,
-    //       shape: RoundedRectangleBorder(
-    //           borderRadius: BorderRadius.all(Radius.circular(20))),
-    //     ));
-    //   } else {
-    //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-    //       content: Text(
-    //         'Something went wrong ',
-    //       ),
-    //       shape: RoundedRectangleBorder(
-    //           borderRadius: BorderRadius.all(Radius.circular(20))),
-    //     ));
-    //   }
-    // }).whenComplete(() => {
-    //           setState(() {
-    //             isLoadig = false;
-    //             //getBottom = true;
-    //           })
-    //         });
-
-    // } catch (e) {
-    //   debugPrint(e.toString());
-    // }
   }
 
-  //////////////////////////////////////////////
-
-  ////////////////////////////////////////////
-  ///
 
   Future<void> resultPlatformState() async {
     if (Platform.isAndroid) {
@@ -384,28 +339,11 @@ class ResultsPageState extends State<ResultsPage> {
                       state.status == PredictioStatus.loaded) {
                     return Column(
                       children: [
-                        // notNUll
-                        //  ?
-                        // Text('This is NUll')
-                        // :
+
                         SquareCroppedImage(path: widget.myImagePath),
                         const SizedBox(
                           height: 55,
                         ),
-                        /////////////////// UNCOMMENT THIS IF THE IMAGE IS NOT in the 1:1 size and comment the SQUARE CROP WIDGET
-                        // SizedBox(
-                        //   height: MediaQuery.of(context).size.width,
-                        //   width: MediaQuery.of(context).size.width,
-                        //   child: ClipRect(
-                        //     child: FittedBox(
-                        //       alignment: Alignment.bottomCenter,
-                        //       fit: BoxFit.fitWidth,
-                        //       child: Image.file(
-                        //         File(arguments['imagePath']),
-                        //       ),
-                        //     ),
-                        //   ),
-                        // ),
 
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -441,27 +379,6 @@ class ResultsPageState extends State<ResultsPage> {
                             )
                           ],
                         ),
-
-                        // GestureDetector(
-                        //   onTap: () {
-                        //     arguments['setcamon']();
-                        //     Navigator.pop(context);
-                        //     clearCache();
-                        //   },
-                        //   child: Padding(
-                        //     padding: const EdgeInsets.symmetric(vertical: 40.0),
-                        //     child: Container(
-                        //         decoration: BoxDecoration(
-                        //             color: primaryColor,
-                        //             border: Border.all(color: primaryColor, width: 5),
-                        //             borderRadius: BorderRadius.circular(20)),
-                        //         child: const Icon(
-                        //           Icons.refresh,
-                        //           size: 40,
-                        //           color: Colors.white,
-                        //         )),
-                        //   ),
-                        // )
                       ],
                     );
                   }
@@ -493,26 +410,6 @@ class IndicatorIcon extends StatelessWidget {
   const IndicatorIcon(
       {Key? key, required this.R, required this.G, required this.B})
       : super(key: key);
-
-  // IconData _getIcon(value) {
-  //   if (value > 70) {
-  //     return FontAwesomeIcons.circleCheck;
-  //   } else if (value < 70 && value > 30) {
-  //     return FontAwesomeIcons.circleStop;
-  //   } else {
-  //     return FontAwesomeIcons.circleXmark;
-  //   }
-  // }
-
-  // Color _getColor(value) {
-  //   if (value > 70) {
-  //     return const Color.fromARGB(255, 0, 169, 6);
-  //   } else if (value < 70 && value > 30) {
-  //     return const Color.fromARGB(255, 173, 156, 2);
-  //   } else {
-  //     return const Color.fromARGB(255, 255, 17, 0);
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {

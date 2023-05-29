@@ -24,7 +24,7 @@ class PredictionCubit extends Cubit<PredictionState> {
 
       emit(state.copyWith(
           status: PredictioStatus.loaded, predictions: predictionss));
-      debugPrint('pREDICTION IS $predictionss');
+      debugPrint('PREDICTION IS $predictionss');
     } catch (e) {
       debugPrint(e.toString());
     }

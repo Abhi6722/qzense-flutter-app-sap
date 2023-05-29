@@ -3,8 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-
 import '../constants/constants.dart';
 
 Color primaryColor = const Color.fromRGBO(12, 52, 61, 1);
@@ -24,6 +22,14 @@ String facebookUrl = 'https://www.facebook.com/qzense';
 String instagramUrl = 'https://www.instagram.com/qzenselabs/?hl=en';
 String linkedInUrl = 'https://in.linkedin.com/company/qzense/';
 
+var accessToken = '';
+
+Future getAccessToken() async{
+  final prefs = await SharedPreferences.getInstance();
+  accessToken = prefs.getString('token')!;
+  debugPrint('Access Token : $accessToken');
+}
+
 Future<void> _launchSocial(String url) async {
   // ignore: deprecated_member_use
   if (!await launch(
@@ -40,7 +46,7 @@ class _HomePageState extends State<HomePage> {
   void getemail() async {
     final emailPref = await SharedPreferences.getInstance();
     var emailId = emailPref.getString('email') ?? "";
-    debugPrint('$emailId :');
+    debugPrint('Email: $emailId');
     setState(() {
       finalEmailId = emailId;
       if (finalEmailId != '') {
@@ -61,52 +67,122 @@ class _HomePageState extends State<HomePage> {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-    // String userName = '';
-    // debugPrint(emailId);
 
     return SafeArea(
-        child: Scaffold(
-            backgroundColor: Colors.white,
-            body: Padding(
-                padding: const EdgeInsets.all(40),
-                child: Stack(
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        //
-                        UserIcon(userName: finalEmailId),
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: Padding(
+          padding: const EdgeInsets.all(40),
+          child: Stack(
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  //
+                  UserIcon(userName: finalEmailId),
+                  const SizedBox(width: 15),
+                  const LogoutButton(),
+                ],
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(context, officialWebsite);
+                    },
+                    child: SizedBox(
+                        height: 200,
+                        width: 200,
+                        child: Image.asset('images/assets/logo.webp')),
+                  ),
+                  const NavButtons(),
+                  const SizedBox(
+                    height: 20,
+                  ),
 
-                        const SizedBox(width: 15),
-                        const LogoutButton(),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.pushNamed(context, Official_Website);
-                            },
-                            child: SizedBox(
-                                height: 200,
-                                width: 200,
-                                child: Image.asset('images/assets/logo.webp')),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      InkWell(
+                        onTap: () {
+                          setState(() {
+                            getAccessToken();
+                          });
+                          debugPrint(accessToken);
+                          Navigator.pushNamed(context, fishPage,
+                              arguments: {'model': 'FISH', 'part': 'GILLS', 'access': accessToken },);
+                          },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            border: Border.all(color: primaryColor, width: 1.5),
                           ),
-                          const NavButtons(),
-                          const SizedBox(
-                            height: 60,
+                          child: Ink(
+                            height: 100,
+                            width: 100,
+                            decoration: const BoxDecoration(
+                              image: DecorationImage(
+                                image: AssetImage(
+                                  'images/assets/Fish.png',
+                                ),
+                              ),
+                            ),
                           ),
-                          const DropDownSelection(),
-                          const SocialFooter(),
-                        ]),
-                  ],
-                ))));
-    // );
+                        ),
+                      ),
+
+                      const SizedBox(width: 70),
+                      InkWell(
+                        onTap: () {
+                          setState(() {
+                            getAccessToken();
+                          });
+                          debugPrint(accessToken);
+                          Navigator.pushNamed(context, bananaPage,
+                            arguments: {'model': 'BANANA', 'part': 'BANANA', 'access': accessToken },);
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            border: Border.all(color: primaryColor, width: 1.5),
+                          ),
+                          child: Ink(
+                            height: 100,
+                            width: 100,
+                            decoration: const BoxDecoration(
+                              image: DecorationImage(
+                                image: AssetImage(
+                                  'images/assets/Bananana.png',
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  const Text('Previous Options 👇🏻', style: TextStyle(fontSize: 20),),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  const DropDownSelection(),
+                  const SocialFooter(),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -116,6 +192,8 @@ class WebViewArguments {
   WebViewArguments(this.title, this.message);
 }
 
+
+// Social Media Footer
 class SocialFooter extends StatelessWidget {
   const SocialFooter({Key? key}) : super(key: key);
 
@@ -170,6 +248,8 @@ class SocialFooter extends StatelessWidget {
   }
 }
 
+
+// Both the Button for Q-Log and Q-Scan
 class NavButtons extends StatelessWidget {
   const NavButtons({Key? key}) : super(key: key);
 
@@ -190,28 +270,23 @@ class NavButtons extends StatelessWidget {
                 color: primaryColor,
               ),
               child: const Center(
-                // child: FaIcon(
-                //   FontAwesomeIcons.earthEurope,
-                //   color: Colors.white,
-                //   size: 70,
-                // ),
                 child: Text(
                   'Q-Log',
                   style: TextStyle(color: Colors.white, fontSize: 30),
                 ),
-              ), //BoxDecoration
+              ),
             ),
-          ), //Container
-        ), //Flexible
+          ),
+        ),
         const SizedBox(
           width: 20,
-        ), //SizedBox
+        ),
         Flexible(
           flex: 1,
           fit: FlexFit.loose,
           child: GestureDetector(
             onTap: () {
-              Navigator.pushNamed(context, Qzenes_dashboard);
+              // Navigator.pushNamed(context, qzenesDashboard);
             },
             child: Container(
               height: 150,
@@ -220,23 +295,21 @@ class NavButtons extends StatelessWidget {
                 color: primaryColor,
               ),
               child: const Center(
-                  // child: FaIcon(
-                  //   FontAwesomeIcons.chartColumn,
-                  //   color: Colors.white,
-                  //   size: 70,
-                  // ),
-                  child: Text(
-                'Q-Scan',
-                style: TextStyle(color: Colors.white, fontSize: 30),
-              )), //BoxDecoration
+                child: Text(
+                  'Q-Scan',
+                  style: TextStyle(color: Colors.white, fontSize: 30),
+                ),
+              ),
             ),
-          ), //Container
-        ) //Flexible
-      ], //<Widget>[]
+          ),
+        ),
+      ],
     );
   }
 }
 
+
+// Both the Button for Fish and Banana
 class DropDownSelection extends StatefulWidget {
   const DropDownSelection({Key? key}) : super(key: key);
 
@@ -250,94 +323,67 @@ class _DropDownSelectionState extends State<DropDownSelection> {
 
   @override
   Widget build(BuildContext context) {
-    // return DropdownButtonFormField(
-    //   style: TextStyle(color: primaryColor),
-    //   onChanged: (val) {
-    //     if (val == subscription[1]) {
-    //       Navigator.pushNamed(context, '/predict',
-    //           arguments: {'model': 'BANANA', 'part': val});
-    //     } else {
-    //       Navigator.pushNamed(context, '/predict',
-    //           arguments: {'model': 'FISH', 'part': val});
-    //     }
-    //   },
-    //   icon: Icon(
-    //     Icons.arrow_downward_sharp,
-    //     color: primaryColor,
-    //   ),
-    //   decoration: InputDecoration(
-    //       border: const OutlineInputBorder(
-    //         borderRadius: BorderRadius.all(
-    //           Radius.circular(10.0),
-    //         ),
-    //       ),
-    //       filled: true,
-    //       hintStyle: TextStyle(color: primaryColor),
-    //       hintText: "Select",
-    //       fillColor: Colors.white),
-    //   items: subscription
-    //       .map<DropdownMenuItem<String>>((e) => DropdownMenuItem(
-    //             child: Text(
-    //               e,
-    //               style: const TextStyle(color: Colors.black),
-    //             ),
-    //             value: e,
-    //           ))
-    //       .toList(),
-    // );
     return Center(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           InkWell(
-              onTap: () {
-                Navigator.pushNamed(context, Camera_page,
-                    arguments: {'model': 'FISH', 'part': subscription[0]});
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  border: Border.all(color: primaryColor, width: 1.5),
+            onTap: () {
+              Navigator.pushNamed(context, cameraPage,
+                  arguments: {'model': 'FISH', 'part': subscription[0]});
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(15),
+                border: Border.all(color: primaryColor, width: 1.5),
+              ),
+              child: Ink(
+                height: 100,
+                width: 100,
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage(
+                      'images/assets/Fish.png',
+                    ),
+                  ),
                 ),
-                child: Ink(
-                  height: 100,
-                  width: 100,
-                  decoration: const BoxDecoration(
-                      image: DecorationImage(
-                          image: AssetImage(
-                    'images/assets/Fish.png',
-                  ))),
-                ),
-              )),
+              ),
+            ),
+          ),
           const SizedBox(
             width: 15,
           ),
           InkWell(
-              onTap: () {
-                Navigator.pushNamed(context, Camera_page,
-                    arguments: {'model': 'BANANA', 'part': subscription[1]});
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  border: Border.all(color: primaryColor, width: 1.5),
+            onTap: () {
+              Navigator.pushNamed(context, cameraPage,
+                  arguments: {'model': 'BANANA', 'part': subscription[1]});
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(15),
+                border: Border.all(color: primaryColor, width: 1.5),
+              ),
+              child: Ink(
+                height: 100,
+                width: 100,
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage(
+                      'images/assets/Bananana.png',
+                    ),
+                  ),
                 ),
-                child: Ink(
-                  height: 100,
-                  width: 100,
-                  decoration: const BoxDecoration(
-                      image: DecorationImage(
-                          image: AssetImage(
-                    'images/assets/Bananana.png',
-                  ))),
-                ),
-              )),
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
+
+// Logout Button at the top navigation bar
 class LogoutButton extends StatefulWidget {
   const LogoutButton({Key? key}) : super(key: key);
 
@@ -361,35 +407,40 @@ class _LogoutButtonState extends State<LogoutButton> {
 
   _displayDialog(BuildContext context) async {
     return showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text('Logout'),
-            content: const Text('Are you sure you want to logout?'),
-            actions: <Widget>[
-              ElevatedButton(
-                child: const Text('Yes'),
-                onPressed: () {
-                  setState(() {
-                    userLogout = true;
-                  });
-                  userLogout ? _removeTokens() : null;
-                  Navigator.popUntil(context, (route) => false);
-                  Navigator.pushNamed((context), Login_page);
-                },
-              ),
-              ElevatedButton(
-                child: const Text('No'),
-                onPressed: () {
-                  setState(() {
-                    userLogout = false;
-                  });
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        });
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Logout'),
+          content: const Text('Are you sure you want to logout?'),
+          actions: <Widget>[
+            MaterialButton(
+              color: primaryColor,
+              textColor: Colors.white,
+              child: const Text('Yes'),
+              onPressed: () {
+                setState(() {
+                  userLogout = true;
+                });
+                userLogout ? _removeTokens() : null;
+                Navigator.popUntil(context, (route) => false);
+                Navigator.pushNamed((context), loginPage);
+              },
+            ),
+            MaterialButton(
+              color: primaryColor,
+              textColor: Colors.white,
+              child: const Text('No'),
+              onPressed: () {
+                setState(() {
+                  userLogout = false;
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -400,8 +451,9 @@ class _LogoutButtonState extends State<LogoutButton> {
       },
       child: Container(
         decoration: BoxDecoration(
-            border: Border.all(width: 1, color: primaryColor),
-            borderRadius: BorderRadius.circular(10)),
+          border: Border.all(width: 1, color: primaryColor),
+          borderRadius: BorderRadius.circular(10),
+        ),
         child: const Padding(
           padding: EdgeInsets.all(6.5),
           child: FaIcon(
@@ -414,6 +466,8 @@ class _LogoutButtonState extends State<LogoutButton> {
   }
 }
 
+
+// User icon at top navbar
 class UserIcon extends StatelessWidget {
   final String userName;
   const UserIcon({Key? key, required this.userName}) : super(key: key);

@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:qzenesapp/screens/homepage.dart';
-
 import 'package:requests/requests.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 //creating logic and ui of input decoration for email and password fields
 
 InputDecoration emailInpDec = InputDecoration(
@@ -17,11 +17,11 @@ InputDecoration passInpDec = InputDecoration(
     filled: true,
     hintStyle: const TextStyle(color: Colors.white, fontSize: 15),
     fillColor: primaryColor);
+
 //////////////////////////////////////
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
-
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
@@ -39,9 +39,10 @@ class _LoginPageState extends State<LoginPage> {
       loading = true;
     });
     try {
+
       // POST REQUEST for getting content of access token and refresh
       var res = await Requests.post(
-          'http://mobileapi.qzenselabs.com:8000/api/auth/jwt/create/',
+          'http://15.206.190.168:8000/auth/login/',
           body: {
             'email': email,
             'password': password,
@@ -54,19 +55,16 @@ class _LoginPageState extends State<LoginPage> {
 
       if (res.statusCode >= 200 && res.statusCode < 400) {
         debugPrint('Login Successful!');
-        debugPrint("AccessToken : ${data['access']}");
-        //debugPrint();
+        debugPrint("AccessToken : ${data['token']['access']}");
 
         //Store access token and email locally on phone for avoiding logins repeatedly
         final prefs = await SharedPreferences.getInstance();
+
         // below code will save the data in local storage of mobile
-        prefs.setString('token', data['access']);
+        prefs.setString('token', data['token']['access']);
         prefs.setString('email', email);
-        debugPrint("apiemail :$data /*['email']*/");
+        debugPrint("api-email :$data /*['email']*/");
 
-        //Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
-
-        //Navigator.popUntil(context, (route) => false);
         Navigator.pushNamed((context), '/');
       } else {
         setState(() {
