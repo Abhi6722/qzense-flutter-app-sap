@@ -64,6 +64,7 @@ class _FishPageState extends State<FishPage> {
   }
 
   Future pickImageFromCamera() async {
+    _showFishResult = false;
     final pickedFile = await picker.pickImage(source: ImageSource.camera);
     setState(() {
       if (pickedFile != null) {
@@ -75,6 +76,7 @@ class _FishPageState extends State<FishPage> {
   }
 
   Future pickImage() async {
+    _showFishResult = false;
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     setState(() {
       if (pickedFile != null) {
