@@ -42,6 +42,7 @@ class _FishPageState extends State<FishPage> {
   var accessT = '';
   final picker = ImagePicker();
   late bool _showFishResult = false;
+  late bool _showCameraIcons = true;
   bool showLoading = false;
 
   // Results
@@ -65,23 +66,29 @@ class _FishPageState extends State<FishPage> {
 
   Future pickImageFromCamera() async {
     _showFishResult = false;
+    _showCameraIcons = false;
     final pickedFile = await picker.pickImage(source: ImageSource.camera);
     setState(() {
       if (pickedFile != null) {
         _imageFile = XFile(pickedFile.path);
+        getResult();
       } else {
-        // print('No image selected.');
+        _showCameraIcons = true;
+        debugPrint('No image selected.');
       }
     });
   }
 
   Future pickImage() async {
     _showFishResult = false;
+    _showCameraIcons = false;
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     setState(() {
       if (pickedFile != null) {
         _imageFile = XFile(pickedFile.path);
+        getResult();
       } else {
+        _showCameraIcons = true;
         if (kDebugMode) {
           print('No image selected.');
         }
@@ -96,9 +103,7 @@ class _FishPageState extends State<FishPage> {
         return AlertDialog(
           title: const Text('Error'),
           content: Text(message),
-          actions: const <Widget>[
-            LogoutButton()
-          ],
+          actions: const <Widget>[LogoutButton()],
         );
       },
     );
@@ -135,7 +140,6 @@ class _FishPageState extends State<FishPage> {
       setState(() {
         showLoading = true;
       });
-
       getAccessToken();
       // Validate required fields
       if (_imageFile == null) {
@@ -216,127 +220,165 @@ class _FishPageState extends State<FishPage> {
         title: const Center(child: Text('Predict Fish Freshness')),
       ),
       body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (_imageFile != null) ...[
-            Image.file(
-              File(_imageFile!.path),
-              width: 250.0,
-              height: 250.0,
-              fit: BoxFit.cover,
+          if (_showFishResult) ...[
+            Expanded(
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height / 3,
+                child: Image.file(
+                  File(_imageFile!.path),
+                  fit: BoxFit.cover,
+                ),
+              ),
             ),
+            // const SizedBox(height: 20.0),
           ],
-          const SizedBox(height: 15.0),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
+          if (_showCameraIcons) ...[
+            Row(
               mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Flexible(
-                  flex: 1,
-                  child: MaterialButton(
-                    height: 70,
-                    color: primaryColor,
-                    onPressed: pickImageFromCamera,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Icon(Icons.camera_alt, color: Colors.white),
-                        SizedBox(width: 8),
-                        Text('Take Photo',
-                            style: TextStyle(color: Colors.white)),
-                      ],
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(100),
+                      child: MaterialButton(
+                        height: 200,
+                        minWidth: 200,
+                        color: primaryColor,
+                        onPressed: pickImageFromCamera,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Column(
+                              children: const [
+                                Icon(
+                                  Icons.camera_alt,
+                                  color: Colors.white,
+                                  size: 40,
+                                ),
+                                SizedBox(height: 20),
+                                Text('Take Photo',
+                                    style: TextStyle(color: Colors.white)),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                const SizedBox(
-                  width: 10,
-                ),
-                Flexible(
-                  flex: 1,
-                  child: MaterialButton(
-                    height: 70,
-                    color: primaryColor,
-                    onPressed: pickImage,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Icon(Icons.photo_library, color: Colors.white),
-                        SizedBox(width: 8),
-                        Text('Upload Image',
-                            style: TextStyle(color: Colors.white)),
-                      ],
+                    const SizedBox(
+                      height: 50,
                     ),
-                  ),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(100),
+                      child: MaterialButton(
+                        height: 200,
+                        minWidth: 200,
+                        color: primaryColor,
+                        onPressed: pickImage,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Column(
+                              children: const [
+                                Icon(
+                                  Icons.photo_library,
+                                  color: Colors.white,
+                                  size: 40,
+                                ),
+                                SizedBox(height: 20),
+                                Text('Upload Image',
+                                    style: TextStyle(color: Colors.white)),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: MaterialButton(
-              onPressed: getResult,
-              color: primaryColor,
-              height: 50,
-              child: const Text('Get Results',
-                  style: TextStyle(color: Colors.white)),
-            ),
-          ),
-          const SizedBox(height: 50.0),
+          ],
           if (showLoading) ...[
             // Show the loading indicator
             LodingInd(
               msg: 'Loading...',
               model: widget.mlModel,
             ),
-          ] else
-            if (_showFishResult) ...[
-              // Show the result
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Text(
-                          result,
-                          style: const TextStyle(
-                            fontSize: 25.0,
+          ] else if (_showFishResult) ...[
+            // Show the result
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Text(
+                        result,
+                        style: const TextStyle(
+                          fontSize: 25.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IndicatorIcon(R: R, G: G, B: B),
+                    ],
+                  ),
+                  const SizedBox(height: 80.0),
+                  Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Container(
+                        height: 150,
+                        color: primaryColor,
+                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                        alignment: Alignment.center,
+                        child: const Text(
+                          "*Results are Only Indicative To Aid Consumers",
+                          style: TextStyle(
+                            fontSize: 16.0,
                             fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
                         ),
-                        IndicatorIcon(R: R, G: G, B: B),
-                      ],
-                    ),
-                    const SizedBox(height: 50.0),
-                    Container(
-                      color: primaryColor,
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              height: 120,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 10.0),
-                              alignment: Alignment.center,
-                              child: const Text(
-                                "*Results are Only Indicative To Aid Consumers",
-                                style: TextStyle(
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
+                      ),
+                      Positioned(
+                        left: MediaQuery.of(context).size.width/2.5,
+                        bottom: 0,
+                        top: -140,
+                        child: InkWell(
+                          onTap: pickImageFromCamera,
+                          child: Container(
+                            width: 90.0,
+                            height: 90.0,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: primaryColor,
+                              border: Border.all(
+                                color: Colors.white,
+                                width: 6.0,
                               ),
                             ),
+                            child: const Icon(
+                              Icons.camera_alt,
+                              color: Colors.white,
+                              size: 30.0,
+                            ),
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
+                ],
               ),
-            ],
+            ),
+          ],
         ],
       ),
     );

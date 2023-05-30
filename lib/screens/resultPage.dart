@@ -64,11 +64,6 @@ class ResultsPageState extends State<ResultsPage> {
     Directory(appDir).delete(recursive: true);
     debugPrint('Cache Cleared!');
   }
-  //////////////////////////////
-  ///
-  /// Method For Downloading File From Gallery
-  ///
-  ///
 
   bool isLoadig = false;
 

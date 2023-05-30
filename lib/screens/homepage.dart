@@ -100,7 +100,7 @@ class _HomePageState extends State<HomePage> {
                         width: 200,
                         child: Image.asset('images/assets/logo.webp')),
                   ),
-                  const NavButtons(),
+                  // const NavButtons(),
                   const SizedBox(
                     height: 20,
                   ),
@@ -108,61 +108,64 @@ class _HomePageState extends State<HomePage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      InkWell(
-                        onTap: () {
-                          setState(() {
-                            getAccessToken();
-                          });
-                          debugPrint(accessToken);
-                          Navigator.pushNamed(context, fishPage,
-                              arguments: {'model': 'FISH', 'part': 'GILLS', 'access': accessToken },);
-                          },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15),
-                            border: Border.all(color: primaryColor, width: 1.5),
-                          ),
-                          child: Ink(
-                            height: 100,
-                            width: 100,
-                            decoration: const BoxDecoration(
-                              image: DecorationImage(
-                                image: AssetImage(
-                                  'images/assets/Fish.png',
+                      Column(
+                        children: [
+                          InkWell(
+                            onTap: () {
+                              setState(() {
+                                getAccessToken();
+                              });
+                              debugPrint(accessToken);
+                              Navigator.pushNamed(context, fishPage,
+                                  arguments: {'model': 'FISH', 'part': 'GILLS', 'access': accessToken },);
+                              },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15),
+                                border: Border.all(color: primaryColor, width: 1.5),
+                              ),
+                              child: Ink(
+                                height: 150,
+                                width: 150,
+                                decoration: const BoxDecoration(
+                                  image: DecorationImage(
+                                    image: AssetImage(
+                                      'images/assets/Fish.png',
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                      ),
-
-                      const SizedBox(width: 70),
-                      InkWell(
-                        onTap: () {
-                          setState(() {
-                            getAccessToken();
-                          });
-                          debugPrint(accessToken);
-                          Navigator.pushNamed(context, bananaPage,
-                            arguments: {'model': 'BANANA', 'part': 'BANANA', 'access': accessToken },);
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15),
-                            border: Border.all(color: primaryColor, width: 1.5),
-                          ),
-                          child: Ink(
-                            height: 100,
-                            width: 100,
-                            decoration: const BoxDecoration(
-                              image: DecorationImage(
-                                image: AssetImage(
-                                  'images/assets/Bananana.png',
+                          const SizedBox(height: 40,),
+                          InkWell(
+                            onTap: () {
+                              setState(() {
+                                getAccessToken();
+                              });
+                              debugPrint(accessToken);
+                              Navigator.pushNamed(context, bananaPage,
+                                arguments: {'model': 'BANANA', 'part': 'BANANA', 'access': accessToken },);
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15),
+                                border: Border.all(color: primaryColor, width: 1.5),
+                              ),
+                              child: Ink(
+                                height: 150,
+                                width: 150,
+                                decoration: const BoxDecoration(
+                                  image: DecorationImage(
+                                    image: AssetImage(
+                                      'images/assets/Bananana.png',
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
                     ],
                   ),
@@ -170,11 +173,11 @@ class _HomePageState extends State<HomePage> {
                   const SizedBox(
                     height: 20,
                   ),
-                  const Text('Previous Options 👇🏻', style: TextStyle(fontSize: 20),),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  const DropDownSelection(),
+                  // const Text('Previous Options 👇🏻', style: TextStyle(fontSize: 20),),
+                  // const SizedBox(
+                  //   height: 20,
+                  // ),
+                  // const DropDownSelection(),
                   const SocialFooter(),
                 ],
               ),
