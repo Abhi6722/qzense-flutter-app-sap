@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -35,8 +36,8 @@ class _FishPageState extends State<FishPage> {
   dynamic size;
   bool isRightHanded = true;
   XFile? _imageFile;
-  bool isBanana = false;
   File? croppedImage;
+  bool isBanana = false;
   int predictionNumeric = -1;
   bool flashOn = false;
   var accessT = '';
@@ -44,6 +45,8 @@ class _FishPageState extends State<FishPage> {
   late bool _showFishResult = false;
   late bool _showCameraIcons = true;
   bool showLoading = false;
+  var model = 'sardine';
+  var models = ['sardine', 'mackerel'];
 
   // Results
   late String result = '';
@@ -78,6 +81,50 @@ class _FishPageState extends State<FishPage> {
       }
     });
   }
+
+  // Future pickImageFromCamera() async {
+  //   _showFishResult = false;
+  //   _showCameraIcons = false;
+  //   final pickedFile = await picker.pickImage(source: ImageSource.camera);
+  //   setState(() async {
+  //     if (pickedFile != null) {
+  //       _imageFile = XFile(pickedFile.path);
+  //       // debugPrint('Image File : $_imageFile');
+  //       // // code for getting dimension of selected image
+  //       // File tempImage = File(_imageFile!.path);
+  //       // var decodedImage =
+  //       //     await decodeImageFromList(tempImage.readAsBytesSync());
+  //
+  //       if (decodedImage.height != decodedImage.width) {
+  //         //if image is not square then cropper opens else call to api
+  //         croppedImage = (await ImageCropper().cropImage(
+  //           sourcePath: _imageFile!.path,
+  //           aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+  //           compressQuality: 100,
+  //           maxWidth: 700,
+  //           maxHeight: 700,
+  //           compressFormat: ImageCompressFormat.png,
+  //           // androidUiSettings: AndroidUiSettings(
+  //           //   lockAspectRatio: true,
+  //           // )
+  //         )) as File?;
+  //         if (croppedImage == null) {
+  //           setState(() {
+  //             cameraOn = true;
+  //           });
+  //         }
+  //         setState(() {
+  //           myImagePath = croppedImage!.path;
+  //           cameraOn = true;
+  //           getResult();
+  //         });
+  //       }
+  //     } else {
+  //       _showCameraIcons = true;
+  //       debugPrint('No image selected.');
+  //     }
+  //   });
+  // }
 
   Future pickImage() async {
     _showFishResult = false;
@@ -152,7 +199,7 @@ class _FishPageState extends State<FishPage> {
       };
 
       var request = http.MultipartRequest(
-          'POST', Uri.parse('http://15.206.190.168:8000/post/'));
+          'POST', Uri.parse('http://43.204.133.133:8000/post/'));
       request.fields.addAll({
         'deviceModel': androidInfo.model,
         'brand': androidInfo.brand,
@@ -161,6 +208,7 @@ class _FishPageState extends State<FishPage> {
         'part': widget.part,
         'hour': hour,
         'flash': flashOn ? 1.toString() : 0.toString(),
+        'FishName': model,
       });
       request.files
           .add(await http.MultipartFile.fromPath('capture', _imageFile!.path));
@@ -172,12 +220,12 @@ class _FishPageState extends State<FishPage> {
         var responseBody = await response.stream.bytesToString();
         debugPrint(responseBody);
         var responseData = json.decode(responseBody);
-        result = responseData['result'];
-        numericVal = responseData['numericVal'];
-        R = responseData['R'];
-        G = responseData['G'];
-        B = responseData['B'];
-        numberOfFishes = responseData['NumberOfFishes'];
+        result = responseData['Freshness'];
+        // numericVal = responseData['numericVal'];
+        // R = responseData['R'];
+        // G = responseData['G'];
+        // B = responseData['B'];
+        // numberOfFishes = responseData['NumberOfFishes'];
         _showFishResult = true;
       } else {
         debugPrint(response.reasonPhrase);
@@ -244,6 +292,35 @@ class _FishPageState extends State<FishPage> {
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    Container(
+                      color: Colors.green[200],
+                      width: 150,
+                      height: 60,
+                      child: Center(
+                        child: DropdownButton<String>(
+                          value: model,
+                          // hint: const Text('Select Fish Type'),
+                          icon: const Icon(Icons.keyboard_arrow_down),
+                          items: models.map((String item) {
+                            return DropdownMenuItem<String>(
+                              value: item,
+                              child: Text(item, style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                              ),),
+                            );
+                          }).toList(),
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              model = newValue!;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 50,
+                    ),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(100),
                       child: MaterialButton(
@@ -318,8 +395,15 @@ class _FishPageState extends State<FishPage> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      const Text(
+                        "Freshness :  ",
+                        style: TextStyle(
+                          fontSize: 25.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       Text(
                         result,
                         style: const TextStyle(
@@ -327,7 +411,7 @@ class _FishPageState extends State<FishPage> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      IndicatorIcon(R: R, G: G, B: B),
+                      // IndicatorIcon(R: R, G: G, B: B),
                     ],
                   ),
                   const SizedBox(height: 80.0),
@@ -385,18 +469,18 @@ class _FishPageState extends State<FishPage> {
   }
 }
 
-class IndicatorIcon extends StatelessWidget {
-  final int R, G, B;
-  const IndicatorIcon(
-      {Key? key, required this.R, required this.G, required this.B})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return FaIcon(
-      FontAwesomeIcons.solidCircle,
-      color: Color.fromARGB(255, R, G, B),
-      size: 40,
-    );
-  }
-}
+// class IndicatorIcon extends StatelessWidget {
+//   final int R, G, B;
+//   const IndicatorIcon(
+//       {Key? key, required this.R, required this.G, required this.B})
+//       : super(key: key);
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return FaIcon(
+//       FontAwesomeIcons.solidCircle,
+//       color: Color.fromARGB(255, R, G, B),
+//       size: 40,
+//     );
+//   }
+// }

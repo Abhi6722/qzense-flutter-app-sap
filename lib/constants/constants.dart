@@ -1,4 +1,4 @@
-const url = "http://15.206.190.168:8000/post/";
+const url = "http://43.204.133.133:8000/post/";
 const loginPage = '/LoginPage';
 const cameraPage = '/cameraPage';
 const fishPage = '/fishPage';
@@ -6,4 +6,5 @@ const bananaPage = '/bananaPage';
 const resultPage = '/resultpage';
 const officialWebsite = '/officialWebsite';
 const qzenesDashboard = '/qzenesDashBoard';
+const fishPageTest = '/fishpagetest';
 bool autoSavedToGallery = false;

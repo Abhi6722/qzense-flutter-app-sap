@@ -9,37 +9,12 @@ import 'constants/constants.dart';
 import 'cubits/prediction/prediction_cubit_cubit.dart';
 
 bool auth = false;
-Future<bool> checkAuthToken(prefs) async {
-  final token = prefs.getString('token') ?? "";
-
-  //below code for checking user's device has internet connection or not
-  try {
-    final result = await InternetAddress.lookup('google.com');
-    if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-      debugPrint('Internet Connected');
-    }
-  } on SocketException catch (_) {
-    debugPrint('Internet not Connected');
-  }
-  /////////////////////
-
-  // Code for Checking Authentication
-  if (token != "") {
-    debugPrint('Local Token found!');
-    debugPrint('Local Token : $token\n');
-    final email = prefs.getString('email') ?? "";
-    debugPrint('Email: $email');
-    return true;
-  } else {
-    debugPrint('!!!!!!! Auth not Found using Token !!!!!!!');
-    return false;
-  }
-}
+// srish
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final prefs = await SharedPreferences.getInstance();
-  auth = await checkAuthToken(prefs);
+  // final prefs = await SharedPreferences.getInstance();
+  // auth = await checkAuthToken(prefs);
   runApp(const MyApp());
 }
 

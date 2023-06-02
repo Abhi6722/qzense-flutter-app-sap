@@ -11,8 +11,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/LodingIndicator.dart';
 import 'homepage.dart';
 
-class BananaPage extends StatefulWidget {
-  BananaPage(
+class FishPageTest extends StatefulWidget {
+  FishPageTest(
       {Key? key,
         required this.mlModel,
         required this.part,
@@ -23,10 +23,10 @@ class BananaPage extends StatefulWidget {
   String access = '';
 
   @override
-  State<BananaPage> createState() => _BananaPageState();
+  State<FishPageTest> createState() => _FishPageTestState();
 }
 
-class _BananaPageState extends State<BananaPage> {
+class _FishPageTestState extends State<FishPageTest> {
   static final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
   bool cameraOn = true;
   late AndroidDeviceInfo androidInfo;
@@ -41,9 +41,12 @@ class _BananaPageState extends State<BananaPage> {
   bool flashOn = false;
   var accessT = '';
   final picker = ImagePicker();
-  late bool _showBananaResult = false;
+  late bool _showFishResult = false;
   late bool _showCameraIcons = true;
   bool showLoading = false;
+  late bool _isFishSelected = true;
+  var model = 'sardine';
+  var models = ['sardine', 'mackerel'];
 
   // Results
   late String result = '';
@@ -65,7 +68,7 @@ class _BananaPageState extends State<BananaPage> {
   }
 
   Future pickImageFromCamera() async {
-    _showBananaResult = false;
+    _showFishResult = false;
     _showCameraIcons = false;
     final pickedFile = await picker.pickImage(source: ImageSource.camera);
     setState(() {
@@ -80,7 +83,7 @@ class _BananaPageState extends State<BananaPage> {
   }
 
   Future pickImage() async {
-    _showBananaResult = false;
+    _showFishResult = false;
     _showCameraIcons = false;
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     setState(() {
@@ -103,9 +106,7 @@ class _BananaPageState extends State<BananaPage> {
         return AlertDialog(
           title: const Text('Error'),
           content: Text(message),
-          actions: const <Widget>[
-            LogoutButton()
-          ],
+          actions: const <Widget>[LogoutButton()],
         );
       },
     );
@@ -142,7 +143,6 @@ class _BananaPageState extends State<BananaPage> {
       setState(() {
         showLoading = true;
       });
-
       getAccessToken();
       // Validate required fields
       if (_imageFile == null) {
@@ -164,6 +164,7 @@ class _BananaPageState extends State<BananaPage> {
         'part': widget.part,
         'hour': hour,
         'flash': flashOn ? 1.toString() : 0.toString(),
+        'FishName': model,
       });
       request.files
           .add(await http.MultipartFile.fromPath('capture', _imageFile!.path));
@@ -176,11 +177,12 @@ class _BananaPageState extends State<BananaPage> {
         debugPrint(responseBody);
         var responseData = json.decode(responseBody);
         result = responseData['result'];
-        numericVal = responseData['numericVal'];
-        R = responseData['R'];
-        G = responseData['G'];
-        B = responseData['B'];
-        _showBananaResult = true;
+        // numericVal = responseData['numericVal'];
+        // R = responseData['R'];
+        // G = responseData['G'];
+        // B = responseData['B'];
+        // numberOfFishes = responseData['NumberOfFishes'];
+        _showFishResult = true;
       } else {
         debugPrint(response.reasonPhrase);
         debugPrint("\nThe status code is : ${response.statusCode.toString()}");
@@ -219,13 +221,13 @@ class _BananaPageState extends State<BananaPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primaryColor,
-        title: const Center(child: Text('Predict Banana Freshness')),
+        title: const Center(child: Text('Test Fish Freshness')),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (_showBananaResult) ...[
+          if (_showFishResult) ...[
             Expanded(
               child: SizedBox(
                 width: MediaQuery.of(context).size.width,
@@ -246,6 +248,35 @@ class _BananaPageState extends State<BananaPage> {
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    Container(
+                      color: Colors.green[200],
+                      width: 150,
+                      height: 60,
+                      child: Center(
+                        child: DropdownButton<String>(
+                          value: model,
+                          // hint: const Text('Select Fish Type'),
+                          icon: const Icon(Icons.keyboard_arrow_down),
+                          items: models.map((String item) {
+                            return DropdownMenuItem<String>(
+                              value: item,
+                              child: Text(item, style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                              ),),
+                            );
+                          }).toList(),
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              model = newValue!;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 50,
+                    ),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(100),
                       child: MaterialButton(
@@ -312,93 +343,95 @@ class _BananaPageState extends State<BananaPage> {
               msg: 'Loading...',
               model: widget.mlModel,
             ),
-          ] else if (_showBananaResult) ...[
-              // Show the result
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Text(
-                          result,
-                          style: const TextStyle(
-                            fontSize: 25.0,
+          ] else if (_showFishResult) ...[
+            // Show the result
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Text(
+                        result,
+                        style: const TextStyle(
+                          fontSize: 25.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      // IndicatorIcon(R: R, G: G, B: B),
+                    ],
+                  ),
+                  const SizedBox(height: 80.0),
+                  Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Container(
+                        height: 150,
+                        color: primaryColor,
+                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                        alignment: Alignment.center,
+                        child: const Text(
+                          "*Results are Only Indicative To Aid Consumers",
+                          style: TextStyle(
+                            fontSize: 16.0,
                             fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
                         ),
-                        IndicatorIcon(R: R, G: G, B: B),
-                      ],
-                    ),
-                    const SizedBox(height: 80.0),
-                    Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        Container(
-                          height: 150,
-                          color: primaryColor,
-                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                          alignment: Alignment.center,
-                          child: const Text(
-                            "*Results are Only Indicative To Aid Consumers",
-                            style: TextStyle(
-                              fontSize: 16.0,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          left: MediaQuery.of(context).size.width/2.5,
-                          bottom: 0,
-                          top: -140,
-                          child: InkWell(
-                            onTap: pickImageFromCamera,
-                            child: Container(
-                              width: 90.0,
-                              height: 90.0,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: primaryColor,
-                                border: Border.all(
-                                  color: Colors.white,
-                                  width: 6.0,
-                                ),
-                              ),
-                              child: const Icon(
-                                Icons.camera_alt,
+                      ),
+                      Positioned(
+                        left: MediaQuery.of(context).size.width/2.5,
+                        bottom: 0,
+                        top: -140,
+                        child: InkWell(
+                          onTap: pickImageFromCamera,
+                          child: Container(
+                            width: 90.0,
+                            height: 90.0,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: primaryColor,
+                              border: Border.all(
                                 color: Colors.white,
-                                size: 30.0,
+                                width: 6.0,
                               ),
+                            ),
+                            child: const Icon(
+                              Icons.camera_alt,
+                              color: Colors.white,
+                              size: 30.0,
                             ),
                           ),
                         ),
-                      ],
-                    ),
-                  ],
-                ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ],
+            ),
+          ],
         ],
       ),
     );
   }
 }
 
-class IndicatorIcon extends StatelessWidget {
-  final int R, G, B;
-  const IndicatorIcon(
-      {Key? key, required this.R, required this.G, required this.B})
-      : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    return FaIcon(
-      FontAwesomeIcons.solidCircle,
-      color: Color.fromARGB(255, R, G, B),
-      size: 40,
-    );
-  }
-}
+//
+// class IndicatorIcon extends StatelessWidget {
+//   final int R, G, B;
+//   const IndicatorIcon(
+//       {Key? key, required this.R, required this.G, required this.B})
+//       : super(key: key);
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return FaIcon(
+//       FontAwesomeIcons.solidCircle,
+//       color: Color.fromARGB(255, R, G, B),
+//       size: 40,
+//     );
+//   }
+// }

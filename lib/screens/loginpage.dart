@@ -42,7 +42,7 @@ class _LoginPageState extends State<LoginPage> {
 
       // POST REQUEST for getting content of access token and refresh
       var res = await Requests.post(
-          'http://15.206.190.168:8000/auth/login/',
+          'http://43.204.133.133:8000/auth/login/',
           body: {
             'email': email,
             'password': password,

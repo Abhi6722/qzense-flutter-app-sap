@@ -6,6 +6,7 @@ import 'package:qzenesapp/screens/bananaPage.dart';
 import 'package:qzenesapp/screens/homepage.dart';
 import 'package:qzenesapp/screens/loginpage.dart';
 import 'package:qzenesapp/screens/resultPage.dart';
+import 'package:qzenesapp/screens/test.dart';
 import 'package:qzenesapp/webview/official_website.dart';
 import 'package:qzenesapp/webview/qzenes_dashboard.dart';
 
@@ -28,6 +29,16 @@ class MyRoutes {
               access: args['access'],
             ),
           );
+
+      case fishPageTest:
+        Map<String, dynamic> args = settings.arguments as Map<String, dynamic>;
+        return MaterialPageRoute(
+          builder: (_) => GillsPage(
+            mlModel: args['model'],
+            part: args['part'],
+            access: args['access'],
+          ),
+        );
 
         case bananaPage:
         Map<String, dynamic> args = settings.arguments as Map<String, dynamic>;
