@@ -88,140 +88,142 @@ class _LoginPageState extends State<LoginPage> {
           body: Padding(
             padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.1),
             child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  SizedBox(
-                      height: 200,
-                      width: 200,
-                      child: Image.asset('images/assets/logo.webp')),
-                  TextFormField(
-                    onChanged: (val) {
-                      setState(() {
-                        loginError = '';
-                        email = val;
-                        emailEmpty = val.isNotEmpty ? false : true;
-                        loginButtonEnabled =
-                            (!emailEmpty && !passEmpty) ? true : false;
-                      });
-                    },
-                    cursorColor: primaryColor,
-                    keyboardType: TextInputType.emailAddress,
-                    autofocus: true,
-                    style: TextStyle(fontSize: 15, color: primaryColor),
-                    decoration: InputDecoration(
-                      hintText: 'Email',
-                      contentPadding: const EdgeInsets.symmetric(
-                          vertical: 25.0, horizontal: 25.0),
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5.0)),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                        height: 200,
+                        width: 200,
+                        child: Image.asset('images/assets/logo.webp')),
+                    TextFormField(
+                      onChanged: (val) {
+                        setState(() {
+                          loginError = '';
+                          email = val;
+                          emailEmpty = val.isNotEmpty ? false : true;
+                          loginButtonEnabled =
+                              (!emailEmpty && !passEmpty) ? true : false;
+                        });
+                      },
+                      cursorColor: primaryColor,
+                      keyboardType: TextInputType.emailAddress,
+                      autofocus: true,
+                      style: TextStyle(fontSize: 15, color: primaryColor),
+                      decoration: InputDecoration(
+                        hintText: 'Email',
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 25.0, horizontal: 25.0),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(5.0)),
+                      ),
                     ),
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  TextFormField(
-                    onChanged: (val) {
-                      setState(() {
-                        loginError = '';
-                        password = val;
-                        passEmpty = val.isNotEmpty ? false : true;
-                        loginButtonEnabled =
-                            (!emailEmpty && !passEmpty) ? true : false;
-                      });
-                    },
-                    cursorColor: primaryColor,
-                    obscureText: obscureText,
-                    autofocus: false,
-                    style: TextStyle(fontSize: 15, color: primaryColor),
-                    decoration: InputDecoration(
-                      suffixIcon: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            obscureText = !obscureText;
-                          });
-                        },
-                        child: SizedBox(
-                          width: 60,
-                          child: Center(
-                            child: Icon(
-                              obscureText
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                              color: obscureText ? Colors.grey : Colors.blue,
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    TextFormField(
+                      onChanged: (val) {
+                        setState(() {
+                          loginError = '';
+                          password = val;
+                          passEmpty = val.isNotEmpty ? false : true;
+                          loginButtonEnabled =
+                              (!emailEmpty && !passEmpty) ? true : false;
+                        });
+                      },
+                      cursorColor: primaryColor,
+                      obscureText: obscureText,
+                      autofocus: false,
+                      style: TextStyle(fontSize: 15, color: primaryColor),
+                      decoration: InputDecoration(
+                        suffixIcon: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              obscureText = !obscureText;
+                            });
+                          },
+                          child: SizedBox(
+                            width: 60,
+                            child: Center(
+                              child: Icon(
+                                obscureText
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                color: obscureText ? Colors.grey : Colors.blue,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      suffixIconConstraints: const BoxConstraints.tightFor(),
-                      hintText: 'Password',
-                      contentPadding: const EdgeInsets.symmetric(
-                          vertical: 25.0, horizontal: 25.0),
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5.0)),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 30,
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      FocusScope.of(context).unfocus();
-                      if (loginButtonEnabled) {
-                        _emailRequest();
-                      }
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          color:
-                              loginButtonEnabled ? primaryColor : Colors.grey),
-                      height: 40,
-                      child: const Center(
-                        child: Text(
-                          'Login',
-                          style: TextStyle(fontSize: 15, color: Colors.white),
-                        ),
+                        suffixIconConstraints: const BoxConstraints.tightFor(),
+                        hintText: 'Password',
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 25.0, horizontal: 25.0),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(5.0)),
                       ),
                     ),
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          debugPrint('Forgot Password!');
-                        },
-                        child: const Text(
-                          'Forgot Password?',
-                          style: TextStyle(
-                            decoration: TextDecoration.underline,
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        FocusScope.of(context).unfocus();
+                        if (loginButtonEnabled) {
+                          _emailRequest();
+                        }
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5),
+                            color:
+                                loginButtonEnabled ? primaryColor : Colors.grey),
+                        height: 40,
+                        child: const Center(
+                          child: Text(
+                            'Login',
+                            style: TextStyle(fontSize: 15, color: Colors.white),
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                  Visibility(
-                    visible: loading ? true : false,
-                    child: const Center(child: CircularProgressIndicator()),
-                  ),
-                  Visibility(
-                    visible: loginError == 'Invalid' ? true : false,
-                    child: const Text(
-                      'Invalid ID or Password',
-                      style: TextStyle(color: Colors.red),
                     ),
-                  ),
-                  Visibility(
-                    visible: loginError == 'Error' ? true : false,
-                    child: const Text(
-                      'Server error',
-                      style: TextStyle(color: Colors.red),
+                    const SizedBox(
+                      height: 20,
                     ),
-                  ),
-                ],
+                    Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            debugPrint('Forgot Password!');
+                          },
+                          child: const Text(
+                            'Forgot Password?',
+                            style: TextStyle(
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Visibility(
+                      visible: loading ? true : false,
+                      child: const Center(child: CircularProgressIndicator()),
+                    ),
+                    Visibility(
+                      visible: loginError == 'Invalid' ? true : false,
+                      child: const Text(
+                        'Invalid ID or Password',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ),
+                    Visibility(
+                      visible: loginError == 'Error' ? true : false,
+                      child: const Text(
+                        'Server error',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

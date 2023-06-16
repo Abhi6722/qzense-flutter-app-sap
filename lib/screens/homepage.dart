@@ -72,7 +72,7 @@ class _HomePageState extends State<HomePage> {
       child: Scaffold(
         backgroundColor: Colors.white,
         body: Padding(
-          padding: const EdgeInsets.all(40),
+          padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
           child: Stack(
             children: [
               Row(
@@ -102,109 +102,112 @@ class _HomePageState extends State<HomePage> {
                   ),
                   // const NavButtons(),
                   const SizedBox(
-                    height: 20,
+                    height: 10,
                   ),
 
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Column(
-                        children: [
-                          Row(
-                            children: [
-                              InkWell(
-                                onTap: () {
-                                  setState(() {
-                                    getAccessToken();
-                                  });
-                                  debugPrint(accessToken);
-                                  Navigator.pushNamed(context, fishPage,
-                                      arguments: {'model': 'FISH', 'part': 'body', 'access': accessToken },);
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Column(
+                          children: [
+                            Row(
+                              children: [
+                                InkWell(
+                                  onTap: () {
+                                    setState(() {
+                                      getAccessToken();
+                                    });
+                                    debugPrint(accessToken);
+                                    Navigator.pushNamed(context, fishPage,
+                                        arguments: {'model': 'FISH', 'part': 'body', 'access': accessToken },);
+                                    },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(15),
+                                      border: Border.all(color: primaryColor, width: 1.5),
+                                    ),
+                                    child: Ink(
+                                      height: 130,
+                                      width: 130,
+                                      decoration: const BoxDecoration(
+                                        image: DecorationImage(
+                                          image: AssetImage(
+                                            'images/assets/wholefish.png',
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 20,),
+                                InkWell(
+                                  onTap: () {
+                                    setState(() {
+                                      getAccessToken();
+                                    });
+                                    debugPrint(accessToken);
+                                    Navigator.pushNamed(context, fishPageTest,
+                                      arguments: {'model': 'FISH', 'part': 'GILLS', 'access': accessToken },);
                                   },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(15),
-                                    border: Border.all(color: primaryColor, width: 1.5),
-                                  ),
-                                  child: Ink(
-                                    height: 150,
-                                    width: 150,
-                                    decoration: const BoxDecoration(
-                                      image: DecorationImage(
-                                        image: AssetImage(
-                                          'images/assets/wholefish.png',
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(15),
+                                      border: Border.all(color: primaryColor, width: 1.5),
+                                    ),
+                                    child: Ink(
+                                      height: 130,
+                                      width: 130,
+                                      decoration: const BoxDecoration(
+                                        image: DecorationImage(
+                                          image: AssetImage(
+                                            'images/assets/gills.png',
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: 20,),
-                              InkWell(
-                                onTap: () {
-                                  setState(() {
-                                    getAccessToken();
-                                  });
-                                  debugPrint(accessToken);
-                                  Navigator.pushNamed(context, fishPageTest,
-                                    arguments: {'model': 'FISH', 'part': 'GILLS', 'access': accessToken },);
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(15),
-                                    border: Border.all(color: primaryColor, width: 1.5),
-                                  ),
-                                  child: Ink(
-                                    height: 150,
-                                    width: 150,
-                                    decoration: const BoxDecoration(
-                                      image: DecorationImage(
-                                        image: AssetImage(
-                                          'images/assets/gills.png',
-                                        ),
-                                      ),
-                                    ),
-                                  ),
+                              ],
+                            ),
+                            const SizedBox(height: 20,),
+                            InkWell(
+                              onTap: () {
+                                setState(() {
+                                  getAccessToken();
+                                });
+                                debugPrint(accessToken);
+                                Navigator.pushNamed(context, bananaPage,
+                                  arguments: {'model': 'BANANA', 'part': 'BANANA', 'access': accessToken },);
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(15),
+                                  border: Border.all(color: primaryColor, width: 1.5),
                                 ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 20,),
-                          InkWell(
-                            onTap: () {
-                              setState(() {
-                                getAccessToken();
-                              });
-                              debugPrint(accessToken);
-                              Navigator.pushNamed(context, bananaPage,
-                                arguments: {'model': 'BANANA', 'part': 'BANANA', 'access': accessToken },);
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(15),
-                                border: Border.all(color: primaryColor, width: 1.5),
-                              ),
-                              child: Ink(
-                                height: 150,
-                                width: 150,
-                                decoration: const BoxDecoration(
-                                  image: DecorationImage(
-                                    image: AssetImage(
-                                      'images/assets/bananaimage.png',
+                                child: Ink(
+                                  height: 130,
+                                  width: 130,
+                                  decoration: const BoxDecoration(
+                                    image: DecorationImage(
+                                      image: AssetImage(
+                                        'images/assets/bananaimage.png',
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
 
-                  const SizedBox(
-                    height: 20,
-                  ),
+                  // const SizedBox(
+                  //   height: 10,
+                  // ),
                   // const Text('Previous Options 👇🏻', style: TextStyle(fontSize: 20),),
                   // const SizedBox(
                   //   height: 20,
