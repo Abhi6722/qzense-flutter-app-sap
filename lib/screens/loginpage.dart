@@ -1,24 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:qzenesapp/screens/homepage.dart';
 import 'package:requests/requests.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-//creating logic and ui of input decoration for email and password fields
-
-InputDecoration emailInpDec = InputDecoration(
-    hintText: 'Email ID',
-    filled: true,
-    hintStyle: const TextStyle(color: Colors.white, fontSize: 15),
-    fillColor: primaryColor);
-
-InputDecoration passInpDec = InputDecoration(
-    hintText: 'Password',
-    filled: true,
-    hintStyle: const TextStyle(color: Colors.white, fontSize: 15),
-    fillColor: primaryColor);
-
-//////////////////////////////////////
+const Color primaryColor = Color.fromARGB(255, 22, 80, 92);
+const Color secondaryColor = Color.fromARGB(255, 229,240,234);
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -39,25 +25,24 @@ class _LoginPageState extends State<LoginPage> {
       loading = true;
     });
     try {
-
       // POST REQUEST for getting content of access token and refresh
       var res = await Requests.post(
-          'http://43.204.133.133:8000/auth/login/',
-          body: {
-            'email': email,
-            'password': password,
-          });
+        'http://43.204.133.133:8000/auth/login/',
+        body: {
+          'email': email,
+          'password': password,
+        },
+      );
       setState(() {
         loading = false;
       });
-      Map<String, dynamic> data =
-          Map<String, dynamic>.from(json.decode(res.content()));
+      Map<String, dynamic> data = Map<String, dynamic>.from(json.decode(res.content()));
 
       if (res.statusCode >= 200 && res.statusCode < 400) {
         debugPrint('Login Successful!');
         debugPrint("AccessToken : ${data['token']['access']}");
 
-        //Store access token and email locally on phone for avoiding logins repeatedly
+        // Store access token and email locally on phone for avoiding logins repeatedly
         final prefs = await SharedPreferences.getInstance();
 
         // below code will save the data in local storage of mobile
@@ -92,79 +77,128 @@ class _LoginPageState extends State<LoginPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    SizedBox(
-                        height: 200,
-                        width: 200,
-                        child: Image.asset('images/assets/logo.webp')),
+                    Image.asset(
+                      'images/assets/logo.webp',
+                      height: 70,
+                    ),
+                    const SizedBox(height: 70),
+                    const Text(
+                      'Welcome back',
+                      style: TextStyle(
+                        fontSize: 34,
+                        color: primaryColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Login to your account',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: primaryColor,
+                      ),
+                    ),
+                    const SizedBox(height: 50),
                     TextFormField(
                       onChanged: (val) {
                         setState(() {
                           loginError = '';
                           email = val;
                           emailEmpty = val.isNotEmpty ? false : true;
-                          loginButtonEnabled =
-                              (!emailEmpty && !passEmpty) ? true : false;
+                          loginButtonEnabled = (!emailEmpty && !passEmpty) ? true : false;
                         });
                       },
                       cursorColor: primaryColor,
                       keyboardType: TextInputType.emailAddress,
                       autofocus: true,
-                      style: TextStyle(fontSize: 15, color: primaryColor),
+                      style: const TextStyle(fontSize: 15, color: primaryColor),
                       decoration: InputDecoration(
                         hintText: 'Email',
+                        prefixIcon: const Icon(
+                          Icons.email,
+                          color: primaryColor,
+                        ),
                         contentPadding: const EdgeInsets.symmetric(
-                            vertical: 25.0, horizontal: 25.0),
+                          vertical: 25.0,
+                          horizontal: 25.0,
+                        ),
                         border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(5.0)),
+                          borderRadius: BorderRadius.circular(5.0),
+                          borderSide: BorderSide.none, // Remove the active border line
+                        ),
+                        filled: true,
+                        fillColor: secondaryColor,
+                        hintStyle: const TextStyle(
+                          color: primaryColor,
+                          fontWeight: FontWeight.bold, // Make the placeholder text bold
+                        ),
                       ),
                     ),
-                    const SizedBox(
-                      height: 10,
-                    ),
+                    const SizedBox(height: 20),
+
                     TextFormField(
                       onChanged: (val) {
                         setState(() {
                           loginError = '';
                           password = val;
                           passEmpty = val.isNotEmpty ? false : true;
-                          loginButtonEnabled =
-                              (!emailEmpty && !passEmpty) ? true : false;
+                          loginButtonEnabled = (!emailEmpty && !passEmpty) ? true : false;
                         });
                       },
                       cursorColor: primaryColor,
                       obscureText: obscureText,
                       autofocus: false,
-                      style: TextStyle(fontSize: 15, color: primaryColor),
+                      style: const TextStyle(fontSize: 15, color: primaryColor),
                       decoration: InputDecoration(
+                        hintText: 'Password',
+                        prefixIcon: const Icon(
+                          Icons.lock,
+                          color: primaryColor,
+                        ),
                         suffixIcon: GestureDetector(
                           onTap: () {
                             setState(() {
                               obscureText = !obscureText;
                             });
                           },
-                          child: SizedBox(
-                            width: 60,
-                            child: Center(
-                              child: Icon(
-                                obscureText
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
-                                color: obscureText ? Colors.grey : Colors.blue,
-                              ),
-                            ),
+                          child: Icon(
+                            obscureText ? Icons.visibility_off : Icons.visibility,
+                            color: primaryColor.withOpacity(0.5),
                           ),
                         ),
-                        suffixIconConstraints: const BoxConstraints.tightFor(),
-                        hintText: 'Password',
                         contentPadding: const EdgeInsets.symmetric(
-                            vertical: 25.0, horizontal: 25.0),
+                          vertical: 25.0,
+                          horizontal: 25.0,
+                        ),
                         border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(5.0)),
+                          borderRadius: BorderRadius.circular(5.0),
+                          borderSide: BorderSide.none, // Remove the active border line
+                        ),
+                        filled: true,
+                        fillColor: secondaryColor,
+                        hintStyle: const TextStyle(
+                          color: primaryColor,
+                          fontWeight: FontWeight.bold, // Make the placeholder text bold
+                        ),
                       ),
                     ),
-                    const SizedBox(
-                      height: 30,
+                    const SizedBox(height: 20),
+                    GestureDetector(
+                      onTap: () {
+                        debugPrint('Forgot Password!');
+                      },
+                      child: const Align(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          'Forgot Password?',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: primaryColor,
+                          ),
+                        ),
+                      ),
                     ),
+                    const SizedBox(height: 20),
                     GestureDetector(
                       onTap: () {
                         FocusScope.of(context).unfocus();
@@ -174,36 +208,25 @@ class _LoginPageState extends State<LoginPage> {
                       },
                       child: Container(
                         decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(5),
-                            color:
-                                loginButtonEnabled ? primaryColor : Colors.grey),
-                        height: 40,
+                          borderRadius: BorderRadius.circular(20),
+                          color: loginButtonEnabled
+                              ? primaryColor
+                              : primaryColor.withOpacity(0.5),
+                        ),
+                        height: 45,
+                        width: double.infinity,
                         child: const Center(
                           child: Text(
                             'Login',
-                            style: TextStyle(fontSize: 15, color: Colors.white),
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    Row(
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            debugPrint('Forgot Password!');
-                          },
-                          child: const Text(
-                            'Forgot Password?',
-                            style: TextStyle(
-                              decoration: TextDecoration.underline,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                    const SizedBox(height: 20),
                     Visibility(
                       visible: loading ? true : false,
                       child: const Center(child: CircularProgressIndicator()),

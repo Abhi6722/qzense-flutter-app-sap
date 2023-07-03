@@ -60,7 +60,7 @@ class _GillsPageState extends State<GillsPage> {
   Future<void> initPlatformState() async {
     if (Platform.isAndroid) {
       deviceInfoPlugin.androidInfo
-          .then((value) => setState(() => {androidInfo = value}));
+          .then((value) => setState(() => androidInfo = value));
     }
   }
 
@@ -280,11 +280,11 @@ class _GillsPageState extends State<GillsPage> {
                         minWidth: 200,
                         color: primaryColor,
                         onPressed: pickImageFromCamera,
-                        child: Row(
+                        child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Column(
-                              children: const [
+                              children: [
                                 Icon(
                                   Icons.camera_alt,
                                   color: Colors.white,
@@ -309,11 +309,11 @@ class _GillsPageState extends State<GillsPage> {
                         minWidth: 200,
                         color: primaryColor,
                         onPressed: pickImage,
-                        child: Row(
+                        child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Column(
-                              children: const [
+                              children: [
                                 Icon(
                                   Icons.photo_library,
                                   color: Colors.white,

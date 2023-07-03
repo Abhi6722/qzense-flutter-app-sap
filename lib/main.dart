@@ -9,7 +9,6 @@ import 'constants/constants.dart';
 import 'cubits/prediction/prediction_cubit_cubit.dart';
 
 bool auth = false;
-// srish
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,7 +37,7 @@ class MyApp extends StatelessWidget {
           title: 'Qzenes Official',
           color: const Color.fromARGB(255, 12, 52, 61),
           theme: ThemeData(
-            primarySwatch: Colors.blue,
+            primarySwatch: Colors.green,
           ),
           //managing routing by generate routes
           initialRoute: auth ? '/' : loginPage,
