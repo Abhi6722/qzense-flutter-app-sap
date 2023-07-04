@@ -2,21 +2,17 @@ import 'dart:convert';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 import '../widgets/LodingIndicator.dart';
 import 'homepage.dart';
 
 class FishPage extends StatefulWidget {
-  FishPage(
-      {Key? key,
-        required this.mlModel,
-        required this.part,
-        required this.access})
+  FishPage({Key? key, required this.mlModel, required this.part, required this.access})
       : super(key: key);
   String mlModel = '';
   String part = '';
@@ -44,6 +40,8 @@ class _FishPageState extends State<FishPage> {
   late bool _showFishResult = false;
   late bool _showCameraIcons = true;
   bool showLoading = false;
+  var model = 'sardine';
+  var models = ['sardine', 'mackerel'];
 
   // Results
   late String result = '';
@@ -60,10 +58,11 @@ class _FishPageState extends State<FishPage> {
   Map<String, String> suffix = {'BANANA': 'Type', 'FISH': 'Freshness'};
   List<String> goMicro = ['0', '20', '40', '60', '80', '100', 'CAM_TEST'];
 
+  FlutterTts ftts = FlutterTts();
+
   Future<void> initPlatformState() async {
     if (Platform.isAndroid) {
-      deviceInfoPlugin.androidInfo
-          .then((value) => setState(() => androidInfo = value));
+      deviceInfoPlugin.androidInfo.then((value) => setState(() => androidInfo = value));
     }
   }
 
@@ -143,7 +142,7 @@ class _FishPageState extends State<FishPage> {
       setState(() {
         showLoading = true;
       });
-      getAccessToken();
+      await getAccessToken();
       // Validate required fields
       if (_imageFile == null) {
         // Error dialog
@@ -154,8 +153,7 @@ class _FishPageState extends State<FishPage> {
         'Authorization': 'Bearer $accessT',
       };
 
-      var request = http.MultipartRequest(
-          'POST', Uri.parse('http://43.204.133.133:8000/post/'));
+      var request = http.MultipartRequest('POST', Uri.parse('http://43.204.133.133:8000/post/'));
       request.fields.addAll({
         'deviceModel': androidInfo.model,
         'brand': androidInfo.brand,
@@ -164,9 +162,9 @@ class _FishPageState extends State<FishPage> {
         'part': widget.part,
         'hour': hour,
         'flash': flashOn ? 1.toString() : 0.toString(),
+        'FishName': model,
       });
-      request.files
-          .add(await http.MultipartFile.fromPath('capture', _imageFile!.path));
+      request.files.add(await http.MultipartFile.fromPath('capture', _imageFile!.path));
       request.headers.addAll(headers);
 
       http.StreamedResponse response = await request.send();
@@ -175,23 +173,34 @@ class _FishPageState extends State<FishPage> {
         var responseBody = await response.stream.bytesToString();
         debugPrint(responseBody);
         var responseData = json.decode(responseBody);
-        result = responseData['Fish species'];
+        result = responseData['Species'] ?? '';
         numberOfFishes = responseData['Fishes detected'];
         goodFishes = responseData['Good fishes'];
-        badFishes = responseData['bad fishes'];
-        resultImage = responseData['image'];
-        // numericVal = responseData['numericVal'];
-        // R = responseData['R'];
-        // G = responseData['G'];
-        // B = responseData['B'];
-
+        badFishes = responseData['Bad fishes'];
+        resultImage = responseData['Image'];
         _showFishResult = true;
+
+        await ftts.setLanguage("en-US");
+        await ftts.setSpeechRate(0.4); //speed of speech
+        await ftts.setVolume(1.0); //volume of speech
+        await ftts.setPitch(1); //pitch of sound
+
+        if(goodFishes > 0 && badFishes == 0){
+          var speakResult = await ftts.speak("Fish Species $result, Number of Fish Detected $numberOfFishes, All Fishes Good");
+          // if(speakResult == 1){}else{}
+        } else if(badFishes > 0 && goodFishes == 0){
+          var speakResult = await ftts.speak("Fish Species $result, Number of Fish Detected $numberOfFishes, All Fishes Bad");
+          // if(speakResult == 1){}else{}
+        } else {
+          var speakResult = await ftts.speak("Fish Species $result, Number of Fish Detected $numberOfFishes, Number of Good Fishes $goodFishes, Number of Bad Fishes $badFishes ");
+          // if(speakResult == 1){}else{}
+        }
+
       } else {
         debugPrint(response.reasonPhrase);
         debugPrint("\nThe status code is : ${response.statusCode.toString()}");
         debugPrint("\nResponse Headers : ${response.headers.toString()}");
-        debugPrint(
-            "\nThe Reason Phrase is : ${response.reasonPhrase.toString()}");
+        debugPrint("\nThe Reason Phrase is : ${response.reasonPhrase.toString()}");
         debugPrint('Res: $response');
         showErrorDialog("Session Expired. Login Again !!");
       }
@@ -247,17 +256,6 @@ class _FishPageState extends State<FishPage> {
                 child: buildImageWidget(), // Display the decoded image widget
               ),
             ),
-            // Expanded(
-            //   child: SizedBox(
-            //     width: MediaQuery.of(context).size.width,
-            //     height: MediaQuery.of(context).size.height / 3,
-            //     child: Image.file(
-            //       File(_imageFile!.path),
-            //       fit: BoxFit.cover,
-            //     ),
-            //   ),
-            // ),
-            // const SizedBox(height: 20.0),
           ],
           if (_showCameraIcons) ...[
             Row(
@@ -267,35 +265,35 @@ class _FishPageState extends State<FishPage> {
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Container(
-                    //   color: Colors.green[200],
-                    //   width: 150,
-                    //   height: 60,
-                    //   child: Center(
-                    //     child: DropdownButton<String>(
-                    //       value: model,
-                    //       // hint: const Text('Select Fish Type'),
-                    //       icon: const Icon(Icons.keyboard_arrow_down),
-                    //       items: models.map((String item) {
-                    //         return DropdownMenuItem<String>(
-                    //           value: item,
-                    //           child: Text(item, style: const TextStyle(
-                    //             fontWeight: FontWeight.bold,
-                    //             fontSize: 20,
-                    //           ),),
-                    //         );
-                    //       }).toList(),
-                    //       onChanged: (String? newValue) {
-                    //         setState(() {
-                    //           model = newValue!;
-                    //         });
-                    //       },
-                    //     ),
-                    //   ),
-                    // ),
-                    // const SizedBox(
-                    //   height: 50,
-                    // ),
+                    Container(
+                      color: Colors.green[200],
+                      width: 150,
+                      height: 60,
+                      child: Center(
+                        child: DropdownButton<String>(
+                          value: model,
+                          // hint: const Text('Select Fish Type'),
+                          icon: const Icon(Icons.keyboard_arrow_down),
+                          items: models.map((String item) {
+                            return DropdownMenuItem<String>(
+                              value: item,
+                              child: Text(item, style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                              ),),
+                            );
+                          }).toList(),
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              model = newValue!;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 50,
+                    ),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(100),
                       child: MaterialButton(
@@ -314,8 +312,7 @@ class _FishPageState extends State<FishPage> {
                                   size: 40,
                                 ),
                                 SizedBox(height: 20),
-                                Text('Take Photo',
-                                    style: TextStyle(color: Colors.white)),
+                                Text('Take Photo', style: TextStyle(color: Colors.white)),
                               ],
                             ),
                           ],
@@ -343,8 +340,7 @@ class _FishPageState extends State<FishPage> {
                                   size: 40,
                                 ),
                                 SizedBox(height: 20),
-                                Text('Upload Image',
-                                    style: TextStyle(color: Colors.white)),
+                                Text('Upload Image', style: TextStyle(color: Colors.white)),
                               ],
                             ),
                           ],
@@ -363,6 +359,7 @@ class _FishPageState extends State<FishPage> {
               model: widget.mlModel,
             ),
           ] else if (_showFishResult) ...[
+
             // Show the result
             Expanded(
               child: Column(
@@ -381,7 +378,9 @@ class _FishPageState extends State<FishPage> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10,),
+                  const SizedBox(
+                    height: 10,
+                  ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -394,7 +393,9 @@ class _FishPageState extends State<FishPage> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10,),
+                  const SizedBox(
+                    height: 10,
+                  ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -408,7 +409,9 @@ class _FishPageState extends State<FishPage> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10,),
+                  const SizedBox(
+                    height: 10,
+                  ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -422,7 +425,9 @@ class _FishPageState extends State<FishPage> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 80.0),
+                  const SizedBox(
+                    height: 80.0,
+                  ),
                   Stack(
                     clipBehavior: Clip.none,
                     children: [
@@ -441,11 +446,14 @@ class _FishPageState extends State<FishPage> {
                         ),
                       ),
                       Positioned(
-                        left: MediaQuery.of(context).size.width/2.5,
+                        left: MediaQuery.of(context).size.width / 2.5,
                         bottom: 0,
                         top: -140,
                         child: InkWell(
-                          onTap: pickImageFromCamera,
+                          onTap: () {
+                            pickImageFromCamera();
+                            // flutterTts.speak('Take Photo'); // Speak the action
+                          },
                           child: Container(
                             width: 90.0,
                             height: 90.0,
@@ -473,25 +481,6 @@ class _FishPageState extends State<FishPage> {
           ],
         ],
       ),
-    );
-  }
-}
-
-
-
-class IndicatorIcon extends StatelessWidget
-{
-  final int R, G, B;
-  const IndicatorIcon(
-      {Key? key, required this.R, required this.G, required this.B})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return FaIcon(
-      FontAwesomeIcons.solidCircle,
-      color: Color.fromARGB(255, R, G, B),
-      size: 40,
     );
   }
 }
