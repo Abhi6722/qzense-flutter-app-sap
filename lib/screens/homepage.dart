@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../constants/constants.dart';
 
 Color primaryColor = const Color.fromRGBO(12, 52, 61, 1);
@@ -24,7 +26,7 @@ String linkedInUrl = 'https://in.linkedin.com/company/qzense/';
 
 var accessToken = '';
 
-Future getAccessToken() async{
+Future getAccessToken() async {
   final prefs = await SharedPreferences.getInstance();
   accessToken = prefs.getString('token')!;
   debugPrint('Access Token : $accessToken');
@@ -45,7 +47,7 @@ Future<void> _launchSocial(String url) async {
 class _HomePageState extends State<HomePage> {
   void getemail() async {
     final emailPref = await SharedPreferences.getInstance();
-    var emailId = emailPref.getString('email') ?? "";
+    var emailId = emailPref.getString('email') ?? '';
     debugPrint('Email: $emailId');
     setState(() {
       finalEmailId = emailId;
@@ -55,10 +57,85 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  final stt.SpeechToText _speech = stt.SpeechToText();
+  String _lastRecognizedWords = '';
+  FlutterTts ftts = FlutterTts();
+
+  void initializeSpeechRecognition() async {
+    bool available = await _speech.initialize();
+    if (available) {
+      _speech.listen(
+        onResult: (result) {
+          if (result.finalResult) {
+            setState(() {
+              _lastRecognizedWords = result.recognizedWords;
+              handleVoiceCommand(_lastRecognizedWords);
+            });
+          }
+        },
+      );
+    } else {
+      debugPrint('Speech recognition not available');
+    }
+  }
+
+  void handleVoiceCommand(String command) {
+    if (command.toLowerCase() == 'hey qzense') {
+      // Respond to the wake-up command
+      _speak('Which model do you want to choose? Fish, Gills, or Banana?');
+    } else if (command.toLowerCase() == 'fish') {
+      // Perform action for Fish
+      _speak('Opening Fish model...');
+      setState(() {
+        getAccessToken();
+      });
+      debugPrint(accessToken);
+      Navigator.pushNamed(context, fishPage,
+          arguments: {'model': 'FISH', 'part': 'body', 'access': accessToken});
+    } else if (command.toLowerCase() == 'gills') {
+      // Perform action for Gills
+      _speak('Opening Gills model...');
+      setState(() {
+        getAccessToken();
+      });
+      debugPrint(accessToken);
+      Navigator.pushNamed(context, fishPageTest,
+          arguments: {'model': 'FISH', 'part': 'GILLS', 'access': accessToken});
+    } else if (command.toLowerCase() == 'banana') {
+      // Perform action for Banana
+      _speak('Opening Banana model...');
+      setState(() {
+        getAccessToken();
+      });
+      debugPrint(accessToken);
+      Navigator.pushNamed(context, bananaPage,
+          arguments: {'model': 'BANANA', 'part': 'BANANA', 'access': accessToken});
+    } else if (command.toLowerCase() == 'click picture') {
+      // Perform action for clicking a picture
+      _speak('Opening camera...');
+      // Add code to open the camera and take a picture
+      // After taking the picture, send the data to the backend and display the result on the screen
+    }
+  }
+
+  Future<void> _speak(String text) async {
+    await ftts.setLanguage("en-US");
+    await ftts.setSpeechRate(0.4); //speed of speech
+    await ftts.setVolume(1.0); //volume of speech
+    await ftts.setPitch(1); //pitch of sound
+    var speakResult = await ftts.speak(text);
+  }
+
   @override
   void initState() {
     getemail();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _speech.stop();
+    super.dispose();
   }
 
   @override
@@ -79,7 +156,6 @@ class _HomePageState extends State<HomePage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  //
                   UserIcon(userName: finalEmailId),
                   const SizedBox(width: 15),
                   const LogoutButton(),
@@ -100,11 +176,9 @@ class _HomePageState extends State<HomePage> {
                         width: 200,
                         child: Image.asset('images/assets/logo.webp')),
                   ),
-                  // const NavButtons(),
                   const SizedBox(
                     height: 10,
                   ),
-
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
@@ -116,17 +190,23 @@ class _HomePageState extends State<HomePage> {
                               children: [
                                 InkWell(
                                   onTap: () {
+                                    _speak('Opening Fish model...');
                                     setState(() {
                                       getAccessToken();
                                     });
                                     debugPrint(accessToken);
                                     Navigator.pushNamed(context, fishPage,
-                                        arguments: {'model': 'FISH', 'part': 'body', 'access': accessToken },);
-                                    },
+                                        arguments: {
+                                          'model': 'FISH',
+                                          'part': 'body',
+                                          'access': accessToken
+                                        });
+                                  },
                                   child: Container(
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(15),
-                                      border: Border.all(color: primaryColor, width: 1.5),
+                                      border: Border.all(
+                                          color: primaryColor, width: 1.5),
                                     ),
                                     child: Ink(
                                       height: 130,
@@ -141,20 +221,28 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                   ),
                                 ),
-                                const SizedBox(width: 20,),
+                                const SizedBox(
+                                  width: 20,
+                                ),
                                 InkWell(
                                   onTap: () {
+                                    _speak('Opening Gills model...');
                                     setState(() {
                                       getAccessToken();
                                     });
                                     debugPrint(accessToken);
                                     Navigator.pushNamed(context, fishPageTest,
-                                      arguments: {'model': 'FISH', 'part': 'GILLS', 'access': accessToken },);
+                                        arguments: {
+                                          'model': 'FISH',
+                                          'part': 'GILLS',
+                                          'access': accessToken
+                                        });
                                   },
                                   child: Container(
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(15),
-                                      border: Border.all(color: primaryColor, width: 1.5),
+                                      border: Border.all(
+                                          color: primaryColor, width: 1.5),
                                     ),
                                     child: Ink(
                                       height: 130,
@@ -171,20 +259,28 @@ class _HomePageState extends State<HomePage> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 20,),
+                            const SizedBox(
+                              height: 20,
+                            ),
                             InkWell(
                               onTap: () {
+                                _speak('Opening Banana model...');
                                 setState(() {
                                   getAccessToken();
                                 });
                                 debugPrint(accessToken);
                                 Navigator.pushNamed(context, bananaPage,
-                                  arguments: {'model': 'BANANA', 'part': 'BANANA', 'access': accessToken },);
+                                    arguments: {
+                                      'model': 'BANANA',
+                                      'part': 'BANANA',
+                                      'access': accessToken
+                                    });
                               },
                               child: Container(
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(15),
-                                  border: Border.all(color: primaryColor, width: 1.5),
+                                  border: Border.all(
+                                      color: primaryColor, width: 1.5),
                                 ),
                                 child: Ink(
                                   height: 130,
@@ -204,15 +300,6 @@ class _HomePageState extends State<HomePage> {
                       ],
                     ),
                   ),
-
-                  // const SizedBox(
-                  //   height: 10,
-                  // ),
-                  // const Text('Previous Options 👇🏻', style: TextStyle(fontSize: 20),),
-                  // const SizedBox(
-                  //   height: 20,
-                  // ),
-                  // const DropDownSelection(),
                   const SocialFooter(),
                 ],
               ),
@@ -230,8 +317,6 @@ class WebViewArguments {
   WebViewArguments(this.title, this.message);
 }
 
-
-// Social Media Footer
 class SocialFooter extends StatelessWidget {
   const SocialFooter({Key? key}) : super(key: key);
 
@@ -286,8 +371,6 @@ class SocialFooter extends StatelessWidget {
   }
 }
 
-
-// Both the Button for Q-Log and Q-Scan
 class NavButtons extends StatelessWidget {
   const NavButtons({Key? key}) : super(key: key);
 
@@ -346,8 +429,6 @@ class NavButtons extends StatelessWidget {
   }
 }
 
-
-// Both the Button for Fish and Banana
 class DropDownSelection extends StatefulWidget {
   const DropDownSelection({Key? key}) : super(key: key);
 
@@ -420,8 +501,6 @@ class _DropDownSelectionState extends State<DropDownSelection> {
   }
 }
 
-
-// Logout Button at the top navigation bar
 class LogoutButton extends StatefulWidget {
   const LogoutButton({Key? key}) : super(key: key);
 
@@ -504,8 +583,6 @@ class _LogoutButtonState extends State<LogoutButton> {
   }
 }
 
-
-// User icon at top navbar
 class UserIcon extends StatelessWidget {
   final String userName;
   const UserIcon({Key? key, required this.userName}) : super(key: key);

@@ -7,6 +7,11 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:camera/camera.dart';
+import 'package:path/path.dart' show join;
+import 'package:path_provider/path_provider.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'dart:async';
 
 import '../widgets/LodingIndicator.dart';
 import 'homepage.dart';
@@ -43,6 +48,17 @@ class _FishPageState extends State<FishPage> {
   var model = 'sardine';
   var models = ['sardine', 'mackerel'];
 
+  //camera initialize
+  CameraController? _cameraController;
+  bool isCameraLoading = true;
+  bool speciesSelected = false;
+  Timer? _timer;
+
+
+  //Text to Speech and Speech to Text
+  FlutterTts ftts = FlutterTts();
+  stt.SpeechToText speech = stt.SpeechToText();
+
   // Results
   late String result = '';
   late int numericVal;
@@ -58,7 +74,6 @@ class _FishPageState extends State<FishPage> {
   Map<String, String> suffix = {'BANANA': 'Type', 'FISH': 'Freshness'};
   List<String> goMicro = ['0', '20', '40', '60', '80', '100', 'CAM_TEST'];
 
-  FlutterTts ftts = FlutterTts();
 
   Future<void> initPlatformState() async {
     if (Platform.isAndroid) {
@@ -66,20 +81,130 @@ class _FishPageState extends State<FishPage> {
     }
   }
 
-  Future pickImageFromCamera() async {
+  // Future pickImageFromCamera() async {
+  //   _showFishResult = false;
+  //   _showCameraIcons = false;
+  //   final pickedFile = await picker.pickImage(source: ImageSource.camera);
+  //   setState(() {
+  //     if (pickedFile != null) {
+  //       _imageFile = XFile(pickedFile.path);
+  //       getResult();
+  //     } else {
+  //       _showCameraIcons = true;
+  //       debugPrint('No image selected.');
+  //     }
+  //   });
+  // }
+
+  void startListening() async {
+    bool isAvailable = await speech.initialize();
+    if (isAvailable) {
+      await ftts.setLanguage("en-US");
+      await ftts.setSpeechRate(0.4);
+      await ftts.setVolume(1.0);
+      await ftts.setPitch(1);
+
+      Map<String, List<String>> speciesVariations = {
+        'sardine': ['sardine', 'sardines', 'sardin', 'sard', 'sardini'],
+        'mackerel': ['mackerel', 'mackeral', 'mackerl', 'mackel', 'macker', 'makarel']
+        // Add more species and their variations if needed
+      };
+
+      String availableSpeciesString = models.join(", ");
+      await ftts.speak("Please say the fish species among the following: $availableSpeciesString");
+
+      await Future.delayed(const Duration(seconds: 4)); // Add a delay to ensure TTS finishes speaking
+
+      bool validSpeciesRecognized = false; // Flag variable to track valid species recognition
+
+      setState(() {
+        speech.listen(
+          onResult: (result) async {
+            if (!mounted) return;
+            String recognizedWord = result.recognizedWords.toLowerCase();
+            debugPrint('Recognized Word: $recognizedWord');
+            String? matchedSpecies;
+            for (String species in speciesVariations.keys) {
+              if (speciesVariations[species]!.contains(recognizedWord)) {
+                matchedSpecies = species;
+                break;
+              }
+            }
+            if (matchedSpecies != null) {
+              setState(() {
+                model = matchedSpecies!;
+                speciesSelected = true;
+              });
+              validSpeciesRecognized = true; // Set the flag to true
+              speech.stop(); // Stop speech recognition
+            }
+          },
+          listenFor: const Duration(minutes: 1), // Listen for 1 minute
+        );
+      });
+
+      // Check the flag after speech recognition ends
+      Future.delayed(const Duration(minutes: 1), () {
+        if (!mounted) return;
+        if (!validSpeciesRecognized) {
+          ftts.speak("Invalid fish species. Please try again.");
+          startListening(); // Start listening again if no valid species was recognized
+        }
+      });
+    } else {
+      // Speech recognition not available
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Speech Recognition Not Available'),
+            content: const Text('Speech recognition is not supported on this device.'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
+
+
+  Future<void> pickImageFromCamera() async {
     _showFishResult = false;
     _showCameraIcons = false;
-    final pickedFile = await picker.pickImage(source: ImageSource.camera);
-    setState(() {
-      if (pickedFile != null) {
-        _imageFile = XFile(pickedFile.path);
+
+    final imageDirectory = await getTemporaryDirectory();
+    final imagePath = join(imageDirectory.path, 'fish_image.jpg');
+
+    XFile? imageFile;
+    try {
+      imageFile = await _cameraController?.takePicture();
+    } catch (e) {
+      // Handle error if the image capture fails
+      debugPrint('Error capturing image: $e');
+    }
+
+    if (imageFile != null) {
+      final File savedImage = File(imageFile.path);
+      await savedImage.copy(imagePath);
+      setState(() {
+        _imageFile = XFile(imagePath);
         getResult();
-      } else {
-        _showCameraIcons = true;
-        debugPrint('No image selected.');
-      }
-    });
+      });
+    } else {
+      // Handle case when no image is captured
+      _showCameraIcons = true;
+      debugPrint('No image captured.');
+    }
   }
+
+
 
   Future pickImage() async {
     _showFishResult = false;
@@ -196,7 +321,27 @@ class _FishPageState extends State<FishPage> {
           // if(speakResult == 1){}else{}
         }
 
-      } else {
+        // Start the timer
+        _timer = Timer(const Duration(seconds: 15), () {
+          // Reset the necessary flags and variables to return to the camera page
+          setState(() {
+            _showFishResult = false;
+            _showCameraIcons = true;
+            _imageFile = null;
+          });
+        });
+
+      } else if(response.statusCode == 403){
+        await ftts.setLanguage("en-US");
+        await ftts.setSpeechRate(0.4); //speed of speech
+        await ftts.setVolume(1.0); //volume of speech
+        await ftts.setPitch(1); //pitch of sound
+        var speak = await ftts.speak("No Fish Detected. Please try Again!");
+        setState(() {
+          _showCameraIcons = true;
+        });
+      }
+      else {
         debugPrint(response.reasonPhrase);
         debugPrint("\nThe status code is : ${response.statusCode.toString()}");
         debugPrint("\nResponse Headers : ${response.headers.toString()}");
@@ -213,13 +358,59 @@ class _FishPageState extends State<FishPage> {
     }
   }
 
+  void captureImageAgain() {
+    _timer?.cancel(); // Cancel the timer if it is active
+
+    setState(() {
+      _showFishResult = false;
+      _showCameraIcons = true;
+      _imageFile = null;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
+    _initializeCamera();
     initPlatformState();
     getAccessToken();
-    debugPrint(widget.mlModel);
-    debugPrint(accessT);
+    // Wait for 5 seconds and ask the user for the fish species
+    Future.delayed(const Duration(seconds: 3), () {
+      startListening();
+    });
+  }
+
+  Future<void> _initializeCamera() async {
+    final cameras = await availableCameras();
+    final camera = cameras.first;
+    _cameraController = CameraController(camera, ResolutionPreset.medium);
+
+    // Wait for the camera initialization to complete
+    await _cameraController!.initialize();
+
+    // Update the loading flag
+    setState(() {
+      isCameraLoading = false;
+    });
+  }
+
+
+  Widget _buildCameraPreview() {
+    if (_cameraController == null || !_cameraController!.value.isInitialized) {
+      return Container();
+    }
+    return AspectRatio(
+      aspectRatio: _cameraController!.value.aspectRatio,
+      child: CameraPreview(_cameraController!),
+    );
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel(); // Cancel the timer if it is active
+    _cameraController?.dispose(); // Dispose the camera controller
+    ftts.stop(); // Stop text-to-speech engine
+    super.dispose();
   }
 
   void setCameraOn() {
@@ -245,8 +436,8 @@ class _FishPageState extends State<FishPage> {
         title: const Center(child: Text('Fish Model')),
       ),
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        // mainAxisAlignment: MainAxisAlignment.center,
+        // crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (_showFishResult) ...[
             Expanded(
@@ -257,14 +448,17 @@ class _FishPageState extends State<FishPage> {
               ),
             ),
           ],
-          if (_showCameraIcons) ...[
+          if (_showCameraIcons || isCameraLoading) ...[
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height / 2.5,
+                      child: _buildCameraPreview(),
+                    ),
+                    const SizedBox(height: 20,),
                     Container(
                       color: Colors.green[200],
                       width: 150,
@@ -292,13 +486,13 @@ class _FishPageState extends State<FishPage> {
                       ),
                     ),
                     const SizedBox(
-                      height: 50,
+                      height: 20,
                     ),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(100),
                       child: MaterialButton(
-                        height: 200,
-                        minWidth: 200,
+                        height: 150,
+                        minWidth: 150,
                         color: primaryColor,
                         onPressed: pickImageFromCamera,
                         child: const Row(
@@ -319,44 +513,51 @@ class _FishPageState extends State<FishPage> {
                         ),
                       ),
                     ),
-                    const SizedBox(
-                      height: 50,
-                    ),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(100),
-                      child: MaterialButton(
-                        height: 200,
-                        minWidth: 200,
-                        color: primaryColor,
-                        onPressed: pickImage,
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Column(
-                              children: [
-                                Icon(
-                                  Icons.photo_library,
-                                  color: Colors.white,
-                                  size: 40,
-                                ),
-                                SizedBox(height: 20),
-                                Text('Upload Image', style: TextStyle(color: Colors.white)),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                    // const SizedBox(
+                    //   height: 50,
+                    // ),
+                    // ClipRRect(
+                    //   borderRadius: BorderRadius.circular(100),
+                    //   child: MaterialButton(
+                    //     height: 200,
+                    //     minWidth: 200,
+                    //     color: primaryColor,
+                    //     onPressed: pickImage,
+                    //     child: const Row(
+                    //       mainAxisAlignment: MainAxisAlignment.center,
+                    //       children: [
+                    //         Column(
+                    //           children: [
+                    //             Icon(
+                    //               Icons.photo_library,
+                    //               color: Colors.white,
+                    //               size: 40,
+                    //             ),
+                    //             SizedBox(height: 20),
+                    //             Text('Upload Image', style: TextStyle(color: Colors.white)),
+                    //           ],
+                    //         ),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
               ],
+
             ),
+
           ],
           if (showLoading) ...[
             // Show the loading indicator
-            LodingInd(
-              msg: 'Loading...',
-              model: widget.mlModel,
+            Container(
+              margin: EdgeInsetsDirectional.only(top: MediaQuery.of(context).size.height / 4),
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height / 2.5,
+              child: LodingInd(
+                msg: 'Loading...',
+                model: widget.mlModel,
+              ),
             ),
           ] else if (_showFishResult) ...[
 
@@ -451,7 +652,11 @@ class _FishPageState extends State<FishPage> {
                         top: -140,
                         child: InkWell(
                           onTap: () {
-                            pickImageFromCamera();
+                            setState(() {
+                              _showFishResult = false;
+                              _showCameraIcons = true;
+                            });
+                            // pickImageFromCamera();
                             // flutterTts.speak('Take Photo'); // Speak the action
                           },
                           child: Container(
