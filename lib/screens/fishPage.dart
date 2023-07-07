@@ -66,6 +66,7 @@ class _FishPageState extends State<FishPage> {
   late int goodFishes;
   late int badFishes;
   String resultImage = '';
+  String specialFeedback = '';
 
   String myImagePath = '',
       predictionResult = '',
@@ -303,6 +304,7 @@ class _FishPageState extends State<FishPage> {
         goodFishes = responseData['Good fishes'];
         badFishes = responseData['Bad fishes'];
         resultImage = responseData['Image'];
+        specialFeedback = responseData['Species-Feedback'];
         _showFishResult = true;
 
         await ftts.setLanguage("en-US");
@@ -626,6 +628,21 @@ class _FishPageState extends State<FishPage> {
                       ),
                     ],
                   ),
+                  // const SizedBox(
+                  //   height: 10,
+                  // ),
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  //   children: [
+                  //     Text(
+                  //       'Special Feedback : $specialFeedback',
+                  //       style: const TextStyle(
+                  //         fontSize: 25.0,
+                  //         fontWeight: FontWeight.bold,
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
                   const SizedBox(
                     height: 80.0,
                   ),
