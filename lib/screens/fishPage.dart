@@ -106,8 +106,35 @@ class _FishPageState extends State<FishPage> {
       await ftts.setPitch(1);
 
       Map<String, List<String>> speciesVariations = {
-        'sardine': ['sardine', 'sardines', 'sardin', 'sard', 'sardini'],
-        'mackerel': ['mackerel', 'mackeral', 'mackerl', 'mackel', 'macker', 'makarel']
+        'sardine': [
+          'sardine', 'sardines', 'sardin', 'sard', 'sardini',
+          'sadden', 'sardi', 'sudden', 'stardean', 'sadi',
+          'sadin', 'sadine', 'studying', 'star deen', 'sardeen',
+          'Sardi', 'Sardine', 'Sadden', 'Sarding', 'sarding',
+          'addin', 'saradin', 'serving', 'Sadden', 'Sardi',
+          'Sudden', 'Stardean', 'Sadi', 'Sadin', 'Sadine',
+          'Studying', 'Star deen', 'Sardeen', 'SARDINE', 'SARDINES',
+          'SARDIN', 'SARD', 'SARDINI', 'SADDEN', 'SARDI',
+          'SUDDEN', 'STARDEAN', 'SADI', 'SADIN', 'SADINE',
+          'STUDYING', 'STAR DEEN', 'SARDEEN'
+        ],
+        'mackerel': [
+          'mackerel', 'mackeral', 'mackerl', 'mackel', 'macker',
+          'makarel', 'macrail', 'macal', 'mackrail', 'makrand',
+          'makral', 'Mackerel', 'Mackel', 'Macaron', 'Mackeral',
+          'Mackerayl', 'Makarai', 'Mackeray', 'Macrail', 'Makkel',
+          'macrool', 'macross', 'macarrel', 'macral', 'macro',
+          'macroe', 'macroil', 'makaralu', 'macarl', 'mascaral',
+          'Macrail', 'Macal', 'Mackrail', 'Makrand', 'Makral',
+          'MACROOL', 'MACROSS', 'MACARREL', 'MACRAL', 'MACRO',
+          'MACROE', 'MACROIL', 'MAKARALU', 'MACARL', 'MASCARAL',
+          'mackrail', 'makrand', 'makral', 'macrool', 'macross',
+          'macarrel', 'macral', 'macro', 'macroe', 'macroil',
+          'makaralu', 'macarl', 'mascaral', 'Mackrail', 'Makrand',
+          'Makral', 'Macrool', 'Macross', 'Macarrel', 'Macral',
+          'Macro', 'Macroe', 'Macroil', 'Makaralu', 'Macarl',
+          'Mascaral'
+        ],
         // Add more species and their variations if needed
       };
 
