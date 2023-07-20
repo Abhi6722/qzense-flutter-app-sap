@@ -97,14 +97,29 @@ class _FishPageState extends State<FishPage> {
   //   });
   // }
 
+  @override
+  void initState() {
+    super.initState();
+    _initializeTTS();
+    _initializeCamera();
+    initPlatformState();
+    getAccessToken();
+    // Wait for 5 seconds and ask the user for the fish species
+    Future.delayed(const Duration(seconds: 3), () {
+      startListening();
+    });
+  }
+
+  void _initializeTTS() async {
+    await ftts.setLanguage("en-US");
+    await ftts.setSpeechRate(0.4); // Speed of speech
+    await ftts.setVolume(1.0); // Volume of speech
+    await ftts.setPitch(1); // Pitch of sound
+  }
+
   void startListening() async {
     bool isAvailable = await speech.initialize();
     if (isAvailable) {
-      await ftts.setLanguage("en-US");
-      await ftts.setSpeechRate(0.4);
-      await ftts.setVolume(1.0);
-      await ftts.setPitch(1);
-
       Map<String, List<String>> speciesVariations = {
         'sardine': [
           'sardine', 'sardines', 'sardin', 'sard', 'sardini',
@@ -171,33 +186,9 @@ class _FishPageState extends State<FishPage> {
         );
       });
 
-      // Check the flag after speech recognition ends
-      Future.delayed(const Duration(minutes: 1), () {
-        if (!mounted) return;
-        if (!validSpeciesRecognized) {
-          ftts.speak("Invalid fish species. Please try again.");
-          startListening(); // Start listening again if no valid species was recognized
-        }
-      });
     } else {
       // Speech recognition not available
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Speech Recognition Not Available'),
-            content: const Text('Speech recognition is not supported on this device.'),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('OK'),
-              ),
-            ],
-          );
-        },
-      );
+      showSpeechNotAvailableDialog();
     }
   }
 
@@ -259,6 +250,26 @@ class _FishPageState extends State<FishPage> {
           title: const Text('Error'),
           content: Text(message),
           actions: const <Widget>[LogoutButton()],
+        );
+      },
+    );
+  }
+
+  void showSpeechNotAvailableDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Speech Recognition Not Available'),
+          content: const Text('Speech recognition is not supported on this device.'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
         );
       },
     );
@@ -397,18 +408,6 @@ class _FishPageState extends State<FishPage> {
     });
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _initializeCamera();
-    initPlatformState();
-    getAccessToken();
-    // Wait for 5 seconds and ask the user for the fish species
-    Future.delayed(const Duration(seconds: 3), () {
-      startListening();
-    });
-  }
-
   Future<void> _initializeCamera() async {
     final cameras = await availableCameras();
     final camera = cameras.first;
@@ -438,7 +437,6 @@ class _FishPageState extends State<FishPage> {
   void dispose() {
     _timer?.cancel(); // Cancel the timer if it is active
     _cameraController?.dispose(); // Dispose the camera controller
-    ftts.stop(); // Stop text-to-speech engine
     super.dispose();
   }
 
@@ -543,13 +541,13 @@ class _FishPageState extends State<FishPage> {
                       ),
                     ),
                     // const SizedBox(
-                    //   height: 50,
+                    //   height: 10,
                     // ),
                     // ClipRRect(
                     //   borderRadius: BorderRadius.circular(100),
                     //   child: MaterialButton(
-                    //     height: 200,
-                    //     minWidth: 200,
+                    //     height: 150,
+                    //     minWidth: 150,
                     //     color: primaryColor,
                     //     onPressed: pickImage,
                     //     child: const Row(
