@@ -73,6 +73,9 @@ dependencies:
   speech_to_text: ^6.3.0
   camera: ^0.10.5+2
   string_similarity: ^2.0.0
+  volume_watcher: ^2.0.1
+  volume_controller: ^2.0.7
+  flutter_android_volume_keydown: ^1.0.0
   
   
   

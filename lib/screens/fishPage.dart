@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:camera/camera.dart';
+import 'package:volume_controller/volume_controller.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
@@ -104,10 +105,46 @@ class _FishPageState extends State<FishPage> {
     _initializeCamera();
     initPlatformState();
     getAccessToken();
+
+    // Listen to system volume changes
+    VolumeController().listener((volume) {
+      if (volume > 0) {
+        // Volume Up button pressed
+        _handleVolumeButtonPress();
+      } else {
+        // Volume Down button pressed
+        _handleVolumeButtonPress();
+      }
+    });
+
     // Wait for 5 seconds and ask the user for the fish species
     Future.delayed(const Duration(seconds: 3), () {
       startListening();
     });
+  }
+
+  bool _takingPicture = false; // Add this state variable
+
+  void _handleVolumeButtonPress() async {
+    if (!_takingPicture) {
+      _takingPicture = true;
+      setState(() {});
+
+      await pickImageFromCamera();
+
+      setState(() {
+        _takingPicture = false;
+      });
+    }
+  }
+
+
+  @override
+  void dispose() {
+    VolumeController().removeListener();
+    _timer?.cancel(); // Cancel the timer if it is active
+    _cameraController?.dispose(); // Dispose the camera controller
+    super.dispose();
   }
 
   void _initializeTTS() async {
@@ -192,8 +229,6 @@ class _FishPageState extends State<FishPage> {
     }
   }
 
-
-
   Future<void> pickImageFromCamera() async {
     _showFishResult = false;
     _showCameraIcons = false;
@@ -222,8 +257,6 @@ class _FishPageState extends State<FishPage> {
       debugPrint('No image captured.');
     }
   }
-
-
 
   Future pickImage() async {
     _showFishResult = false;
@@ -433,12 +466,7 @@ class _FishPageState extends State<FishPage> {
     );
   }
 
-  @override
-  void dispose() {
-    _timer?.cancel(); // Cancel the timer if it is active
-    _cameraController?.dispose(); // Dispose the camera controller
-    super.dispose();
-  }
+
 
   void setCameraOn() {
     setState(() {
@@ -475,6 +503,7 @@ class _FishPageState extends State<FishPage> {
               ),
             ),
           ],
+
           if (_showCameraIcons || isCameraLoading) ...[
             Row(
               children: [
