@@ -395,7 +395,7 @@ class _FishPageState extends State<FishPage> {
         }
 
         // Start the timer
-        _timer = Timer(const Duration(seconds: 15), () {
+        _timer = Timer(const Duration(seconds: 7), () {
           // Reset the necessary flags and variables to return to the camera page
           setState(() {
             _showFishResult = false;
