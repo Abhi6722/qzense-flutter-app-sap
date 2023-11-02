@@ -123,6 +123,47 @@ class FishPageState extends State<FishPage> {
     }
   }
 
+  List<String?> predictedValues = ["", "", ""];
+  List<String?> actualValues = ["Good", "Good", "Good"];
+  String? inputImageUrl;
+  String? resultImageUrl;
+
+  Future<void> sendFeedback() async {
+    const String url = 'http://43.204.133.133:8000/feedback/';
+
+    final Map<String, String> body = {
+      'f1_actual': actualValues[0] == "Good" ? "G" : "B",
+      'f2_actual': actualValues[1] == "Good" ? "G" : "B",
+      'f3_actual': actualValues[2] == "Good" ? "G" : "B",
+      'f1_pred': predictedValues[0] == "Good" ? "G" : "B",
+      'f2_pred': predictedValues[1] == "Good" ? "G" : "B",
+      'f3_pred': predictedValues[2] == "Good" ? "G" : "B",
+      'input_image_url': inputImageUrl ?? "",
+      'result_image_url': resultImageUrl ?? "",
+    };
+
+    debugPrint('Feedback Body: $body');
+
+    try {
+      final response = await http.post(Uri.parse(url), body: body);
+
+      if (response.statusCode == 200) {
+        debugPrint('Feedback sent successfully');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.green,
+            content: Text("Feedback Sent Successfully"),
+          ),
+        );
+      } else {
+        debugPrint('Feedback send failed');
+        debugPrint('Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Error: $e');
+    }
+  }
+
   Future<void> fetchDropdownData() async {
     final prefs = await SharedPreferences.getInstance();
     final localDataList = prefs.getStringList('localData') ?? [];
@@ -481,7 +522,18 @@ class FishPageState extends State<FishPage> {
         goodFishes = responseData['Good fishes'];
         badFishes = responseData['Bad fishes'];
         resultImage = responseData['Image'];
+        inputImageUrl = responseData['input_image_url'];
+        resultImageUrl = responseData['result_image_url'];
         specialFeedback = responseData['Species-Feedback'];
+
+        var first3 = responseData['first3'] ?? [];
+        if (first3.length == 3) {
+          for (int i = 0; i < 3; i++) {
+            predictedValues[i] = first3[i];
+          }
+        }
+
+        print(predictedValues);
         _showFishResult = true;
 
         await ftts.setLanguage("en-US");
@@ -608,7 +660,7 @@ class FishPageState extends State<FishPage> {
           if (_showFishResult) ...[
             SizedBox(
               width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height / 3,
+              height: MediaQuery.of(context).size.height / 3.5,
               child: buildImageWidget(), // Display the decoded image widget
             ),
           ],
@@ -678,9 +730,9 @@ class FishPageState extends State<FishPage> {
                         ),
                       ),
                     ),
-                    const SizedBox(
-                      height: 10,
-                    ),
+                    // const SizedBox(
+                    //   height: 10,
+                    // ),
                     // ClipRRect(
                     //   borderRadius: BorderRadius.circular(100),
                     //   child: MaterialButton(
@@ -732,6 +784,9 @@ class FishPageState extends State<FishPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
+                  const SizedBox(
+                    height: 5,
+                  ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -773,14 +828,6 @@ class FishPageState extends State<FishPage> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
                       Text(
                         'Bad Fishes : $badFishes',
                         style: const TextStyle(
@@ -791,93 +838,197 @@ class FishPageState extends State<FishPage> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 6,),
-                  Container(
-                    height: 55, // Adjust the height as needed
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey), // Add a border
-                      borderRadius: BorderRadius.circular(5), // Add some border radius
-                    ),
-                    child: DropdownButton<String>(
-                      value: selectedOption,
-                      underline: Container(), // Remove the default underline
-                      items: dropdownItems.map((String item) {
-                        return DropdownMenuItem<String>(
-                          value: item,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 0),
-                            child: Text(
-                              item,
-                              style: const TextStyle(
-                                fontSize: 12, // Adjust the font size as needed
-                              ),
+                  const SizedBox(height: 10,),
+                  // Container(
+                  //   height: 55, // Adjust the height as needed
+                  //   decoration: BoxDecoration(
+                  //     border: Border.all(color: Colors.grey), // Add a border
+                  //     borderRadius: BorderRadius.circular(5), // Add some border radius
+                  //   ),
+                  //   child: DropdownButton<String>(
+                  //     value: selectedOption,
+                  //     underline: Container(), // Remove the default underline
+                  //     items: dropdownItems.map((String item) {
+                  //       return DropdownMenuItem<String>(
+                  //         value: item,
+                  //         child: Padding(
+                  //           padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 0),
+                  //           child: Text(
+                  //             item,
+                  //             style: const TextStyle(
+                  //               fontSize: 12, // Adjust the font size as needed
+                  //             ),
+                  //           ),
+                  //         ),
+                  //       );
+                  //     }).toList(),
+                  //     onChanged: (String? newValue) {
+                  //       setState(() {
+                  //         selectedOption = newValue;
+                  //       });
+                  //     },
+                  //   ),
+                  // ),
+                  // // Dropdown for "InspectionValuationResult"
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.center,
+                  //   children: [
+                  //     const Text(
+                  //       'InspectionValuationResult:',
+                  //       style: TextStyle(fontSize: 16),
+                  //     ),
+                  //     const SizedBox(width: 10),
+                  //     DropdownButton<String>(
+                  //       value: selectedInspectionValuationResult,
+                  //       items: const [
+                  //         DropdownMenuItem<String>(
+                  //           value: 'A',
+                  //           child: Text('Accept'),
+                  //         ),
+                  //         DropdownMenuItem<String>(
+                  //           value: 'R',
+                  //           child: Text('Reject'),
+                  //         ),
+                  //       ],
+                  //       onChanged: (String? newValue) {
+                  //         if (newValue != null) {
+                  //           setState(() {
+                  //             selectedInspectionValuationResult = newValue;
+                  //           });
+                  //         }
+                  //       },
+                  //     ),
+                  //   ],
+                  // ),
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.center, // Align items in the center horizontally
+                  //   children: [
+                  //     ElevatedButton(
+                  //       onPressed: () {
+                  //         getLatestData();
+                  //       },
+                  //       child: const Row(
+                  //         children: [
+                  //           Icon(Icons.refresh),
+                  //         ],
+                  //       ),
+                  //     ),
+                  //     const SizedBox(width: 5),
+                  //     ElevatedButton(
+                  //       onPressed: () {
+                  //         makePostRequest(selectedOption!);
+                  //       },
+                  //       child: const Row(
+                  //         children: [
+                  //           Text("Upload"),
+                  //         ],
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
+
+                  DataTable(
+                    columns: const <DataColumn>[
+                      DataColumn(label: Text('Fish')),
+                      DataColumn(label: Text('Predicted')),
+                      DataColumn(label: Text('Actual')),
+                    ],
+                    dataRowHeight: 30,
+
+                    rows: <DataRow>[
+                      DataRow(
+                        cells: <DataCell>[
+                          DataCell(Text('Fish1')),
+                          DataCell(
+                            Text(predictedValues[0] ?? ""),
+                            placeholder: false,
+                          ),
+                          DataCell(
+                            DropdownButton<String>(
+                              value: actualValues[0],
+                              items: <String>['Good', 'Bad'].map((String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(value),
+                                );
+                              }).toList(),
+                              onChanged: (String? newValue) {
+                                setState(() {
+                                  actualValues[0] = newValue;
+                                });
+                              },
                             ),
                           ),
-                        );
-                      }).toList(),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          selectedOption = newValue;
-                        });
-                      },
-                    ),
-                  ),
-                  // Dropdown for "InspectionValuationResult"
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        'InspectionValuationResult:',
-                        style: TextStyle(fontSize: 16),
+                        ],
                       ),
-                      const SizedBox(width: 10),
-                      DropdownButton<String>(
-                        value: selectedInspectionValuationResult,
-                        items: const [
-                          DropdownMenuItem<String>(
-                            value: 'A',
-                            child: Text('Accept'),
+                      DataRow(
+                        cells: <DataCell>[
+                          DataCell(Text('Fish2')),
+                          DataCell(
+                            Text(predictedValues[1] ?? ""),
+                            placeholder: false,
                           ),
-                          DropdownMenuItem<String>(
-                            value: 'R',
-                            child: Text('Reject'),
+                          DataCell(
+                            DropdownButton<String>(
+                              value: actualValues[1],
+                              items: <String>['Good', 'Bad'].map((String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(value),
+                                );
+                              }).toList(),
+                              onChanged: (String? newValue) {
+                                setState(() {
+                                  actualValues[1] = newValue;
+                                });
+                              },
+                            ),
                           ),
                         ],
-                        onChanged: (String? newValue) {
-                          if (newValue != null) {
-                            setState(() {
-                              selectedInspectionValuationResult = newValue;
-                            });
-                          }
-                        },
+                      ),
+                      DataRow(
+                        cells: <DataCell>[
+                          DataCell(Text('Fish3')),
+                          DataCell(
+                            Text(predictedValues[2] ?? ""),
+                            placeholder: false,
+                          ),
+                          DataCell(
+                            DropdownButton<String>(
+                              value: actualValues[2],
+                              items: <String>['Good', 'Bad'].map((String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(value),
+                                );
+                              }).toList(),
+                              onChanged: (String? newValue) {
+                                setState(() {
+                                  actualValues[2] = newValue;
+                                });
+                              },
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center, // Align items in the center horizontally
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          getLatestData();
-                        },
-                        child: const Row(
-                          children: [
-                            Icon(Icons.refresh),
-                          ],
-                        ),
+
+                  const SizedBox(width: 5),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 38.0),
+                    child: MaterialButton(
+                      color: Color.fromRGBO(12, 52, 61, 1),
+                      onPressed: () {
+                        sendFeedback();
+                      },
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text("Send Feedback", style: TextStyle(color: Colors.white),),
+                        ],
                       ),
-                      const SizedBox(width: 5),
-                      ElevatedButton(
-                        onPressed: () {
-                          makePostRequest(selectedOption!);
-                        },
-                        child: const Row(
-                          children: [
-                            Text("Upload"),
-                          ],
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
 
                   // const SizedBox(

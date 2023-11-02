@@ -304,42 +304,42 @@ class _HomePageState extends State<HomePage> {
                                 ),
                               ],
                             ),
-                            const SizedBox(
-                              height: 20,
-                            ),
-                            InkWell(
-                              onTap: () {
-                                _speak('Opening Banana model...');
-                                setState(() {
-                                  getAccessToken();
-                                });
-                                debugPrint(accessToken);
-                                Navigator.pushNamed(context, bananaPage,
-                                    arguments: {
-                                      'model': 'BANANA',
-                                      'part': 'BANANA',
-                                      'access': accessToken
-                                    });
-                              },
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(15),
-                                  border: Border.all(
-                                      color: primaryColor, width: 1.5),
-                                ),
-                                child: Ink(
-                                  height: 130,
-                                  width: 130,
-                                  decoration: const BoxDecoration(
-                                    image: DecorationImage(
-                                      image: AssetImage(
-                                        'images/assets/bananaimage.png',
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
+                            // const SizedBox(
+                            //   height: 20,
+                            // ),
+                            // InkWell(
+                            //   onTap: () {
+                            //     _speak('Opening Banana model...');
+                            //     setState(() {
+                            //       getAccessToken();
+                            //     });
+                            //     debugPrint(accessToken);
+                            //     Navigator.pushNamed(context, bananaPage,
+                            //         arguments: {
+                            //           'model': 'BANANA',
+                            //           'part': 'BANANA',
+                            //           'access': accessToken
+                            //         });
+                            //   },
+                            //   child: Container(
+                            //     decoration: BoxDecoration(
+                            //       borderRadius: BorderRadius.circular(15),
+                            //       border: Border.all(
+                            //           color: primaryColor, width: 1.5),
+                            //     ),
+                            //     child: Ink(
+                            //       height: 130,
+                            //       width: 130,
+                            //       decoration: const BoxDecoration(
+                            //         image: DecorationImage(
+                            //           image: AssetImage(
+                            //             'images/assets/bananaimage.png',
+                            //           ),
+                            //         ),
+                            //       ),
+                            //     ),
+                            //   ),
+                            // ),
                           ],
                         ),
                       ],
