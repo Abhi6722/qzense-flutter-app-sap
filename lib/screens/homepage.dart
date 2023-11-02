@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -6,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../constants/constants.dart';
+import 'package:http/http.dart' as http;
 
 Color primaryColor = const Color.fromRGBO(12, 52, 61, 1);
 String finalEmailId = '';
@@ -31,6 +34,47 @@ Future getAccessToken() async {
   accessToken = prefs.getString('token')!;
   debugPrint('Access Token : $accessToken');
 }
+
+void fetchData() async {
+  final prefs = await SharedPreferences.getInstance();
+  final localDataList = prefs.getStringList('localData');
+
+  if (localDataList != null) {
+    // Data exists in shared preferences, use it directly
+    final List<List<String>> localData = localDataList
+        .map((item) => item.split(', '))
+        .toList();
+
+    print('Using data from SharedPreferences: $localData');
+
+    // You can update your dropdownData or do any other necessary actions here.
+
+  } else {
+    // Data doesn't exist in shared preferences, make a GET request
+    final url = Uri.parse('http://43.204.133.133:8000/sap/');
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        final List<dynamic> dataList = jsonData['List'];
+        List<List<String>> localData = dataList
+            .map((item) => List<String>.from(item.cast<String>()))
+            .toList();
+
+        // Store the data in local storage
+        final prefs = await SharedPreferences.getInstance();
+        prefs.setStringList('localData', localData.map((e) => e.join(', ')).toList());
+
+        print('Data fetched and stored in SharedPreferences: $localData');
+      } else {
+        throw Exception('Failed to load data');
+      }
+    } catch (error) {
+      print('Error: $error');
+    }
+  }
+}
+
 
 Future<void> _launchSocial(String url) async {
   // ignore: deprecated_member_use
@@ -193,6 +237,7 @@ class _HomePageState extends State<HomePage> {
                                     _speak('Opening Fish model...');
                                     setState(() {
                                       getAccessToken();
+                                      fetchData();
                                     });
                                     debugPrint(accessToken);
                                     Navigator.pushNamed(context, fishPage,

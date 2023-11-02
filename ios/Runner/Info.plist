@@ -24,6 +24,8 @@
     <string>Use of Camera for Taking Fish or Banana Image</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>Use of Microphone to record audio</string>
+    <key>NSSpeechRecognitionUsageDescription</key>
+    <string>Use for Speech Recognition of Fish Species</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>

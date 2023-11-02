@@ -34,6 +34,10 @@ PODS:
   - Try (2.1.1)
   - url_launcher_ios (0.0.1):
     - Flutter
+  - volume_controller (0.0.1):
+    - Flutter
+  - volume_watcher (0.0.1):
+    - Flutter
   - webview_flutter_wkwebview (0.0.1):
     - Flutter
 
@@ -51,6 +55,8 @@ DEPENDENCIES:
   - speech_to_text (from `.symlinks/plugins/speech_to_text/ios`)
   - sqflite (from `.symlinks/plugins/sqflite/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
+  - volume_controller (from `.symlinks/plugins/volume_controller/ios`)
+  - volume_watcher (from `.symlinks/plugins/volume_watcher/ios`)
   - webview_flutter_wkwebview (from `.symlinks/plugins/webview_flutter_wkwebview/ios`)
 
 SPEC REPOS:
@@ -86,6 +92,10 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/sqflite/ios"
   url_launcher_ios:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
+  volume_controller:
+    :path: ".symlinks/plugins/volume_controller/ios"
+  volume_watcher:
+    :path: ".symlinks/plugins/volume_watcher/ios"
   webview_flutter_wkwebview:
     :path: ".symlinks/plugins/webview_flutter_wkwebview/ios"
 
@@ -106,6 +116,8 @@ SPEC CHECKSUMS:
   TOCropViewController: edfd4f25713d56905ad1e0b9f5be3fbe0f59c863
   Try: 5ef669ae832617b3cee58cb2c6f99fb767a4ff96
   url_launcher_ios: 08a3dfac5fb39e8759aeb0abbd5d9480f30fc8b4
+  volume_controller: 531ddf792994285c9b17f9d8a7e4dcdd29b3eae9
+  volume_watcher: 6271ae8f78dfafa401c8dac4d117c35576568693
   webview_flutter_wkwebview: b7e70ef1ddded7e69c796c7390ee74180182971f
 
 PODFILE CHECKSUM: 7368163408c647b7eb699d0d788ba6718e18fb8d

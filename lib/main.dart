@@ -1,10 +1,8 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:qzenesapp/generated_routes.dart';
 import 'package:qzenesapp/repository/predictionrepo.dart';
 import 'package:qzenesapp/services/qzenes_api_services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'constants/constants.dart';
 import 'cubits/prediction/prediction_cubit_cubit.dart';
 

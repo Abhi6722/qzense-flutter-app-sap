@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:requests/requests.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:requests/requests.dart';
 
 const Color primaryColor = Color.fromARGB(255, 22, 80, 92);
 const Color secondaryColor = Color.fromARGB(255, 229,240,234);
@@ -62,6 +62,31 @@ class _LoginPageState extends State<LoginPage> {
       loginError = 'Error';
     }
   }
+
+  // void getData() async {
+  //   final url = Uri.parse('http://43.204.133.133:8000/sap/');
+  //   try {
+  //     final response = await http.get(url);
+  //     if (response.statusCode == 200) {
+  //       final jsonData = json.decode(response.body);
+  //       final List<dynamic> dataList = jsonData['List'];
+  //       List<List<String>> localData = dataList
+  //           .map((item) => List<String>.from(item.cast<String>()))
+  //           .toList();
+  //
+  //       // Store the data in local storage
+  //       final prefs = await SharedPreferences.getInstance();
+  //       prefs.setStringList('localData', localData.map((e) => e.join(',')).toList());
+  //
+  //       print(localData);
+  //     } else {
+  //       throw Exception('Failed to load data');
+  //     }
+  //   } catch (error) {
+  //     print('Error: $error');
+  //   }
+  // }
+
 
   @override
   Widget build(BuildContext context) {
@@ -204,6 +229,7 @@ class _LoginPageState extends State<LoginPage> {
                         FocusScope.of(context).unfocus();
                         if (loginButtonEnabled) {
                           _emailRequest();
+                          // getData();
                         }
                       },
                       child: Container(

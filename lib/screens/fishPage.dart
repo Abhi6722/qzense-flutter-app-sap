@@ -25,10 +25,10 @@ class FishPage extends StatefulWidget {
   String access = '';
 
   @override
-  State<FishPage> createState() => _FishPageState();
+  State<FishPage> createState() => FishPageState();
 }
 
-class _FishPageState extends State<FishPage> {
+class FishPageState extends State<FishPage> {
   static final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
   bool cameraOn = true;
   late AndroidDeviceInfo androidInfo;
@@ -83,6 +83,110 @@ class _FishPageState extends State<FishPage> {
     }
   }
 
+  List<Map<String, String>?> dropdownData = [];
+  List<String> dropdownItems = [];
+  String? selectedOption;
+
+  String selectedInspectionValuationResult = 'A';
+
+  Future<void> makePostRequest(String selectedOption) async {
+    const String url = 'http://43.204.133.133:8000/sap/';
+
+    final Map<String, String> body = {
+      'InspectionLot': selectedOption.split(',')[0].trim().split(": ")[1],
+      'InspPlanOperationInternalID': selectedOption.split(',')[1].trim().split(": ")[1],
+      'InspectionCharacteristic': selectedOption.split(',')[2].trim().split(": ")[1],
+      'Inspector': 'MOBILE_API',
+      'InspectionValuationResult': selectedInspectionValuationResult,
+    };
+
+    debugPrint('Request Body: $body');
+
+    try {
+      final response = await http.post(Uri.parse(url), body: body);
+
+      if (response.statusCode == 200) {
+        debugPrint('Post request successful');
+        debugPrint('Response: ${response.body}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.green,
+            content: Text("Update Successful"),
+          ),
+        );
+      } else {
+        debugPrint('Post request failed');
+        debugPrint('Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Error: $e');
+    }
+  }
+
+  Future<void> fetchDropdownData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final localDataList = prefs.getStringList('localData') ?? [];
+
+    if (localDataList.isNotEmpty) {
+      dropdownData = localDataList
+          .map((item) => item.split(','))
+          .map((data) {
+        if (data.length >= 3) {
+          return {
+            'InspectionLot': data[0],
+            'InspPlanOperationInternalID': data[1],
+            'InspectionCharacteristic': data[2],
+          };
+        } else {
+          return null; // To handle invalid data
+        }
+      })
+          .where((data) => data != null) // Remove invalid data
+          .toList();
+
+      // Check if data is being processed correctly
+      for (var data in dropdownData) {
+        debugPrint('Data: $data');
+      }
+
+      // Update the dropdown items with the formatted data
+      setState(() {
+        dropdownItems = dropdownData
+            .map((data) =>
+        'InspectionLot: ${data?['InspectionLot']},\nInspPlanOperationInternalID: ${data?['InspPlanOperationInternalID']},\nInspectionCharacteristic: ${data?['InspectionCharacteristic']}\n')
+            .toList();
+      });
+
+      if (dropdownItems.isNotEmpty) {
+        selectedOption = dropdownItems.first;
+      }
+    }
+  }
+
+  void getLatestData() async {
+    final url = Uri.parse('http://43.204.133.133:8000/sap/');
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        final List<dynamic> dataList = jsonData['List'];
+        List<List<String>> localData = dataList
+            .map((item) => List<String>.from(item.cast<String>()))
+            .toList();
+
+        // Store the data in local storage
+        final prefs = await SharedPreferences.getInstance();
+        prefs.setStringList('localData', localData.map((e) => e.join(',')).toList());
+
+      } else {
+        throw Exception('Failed to load data');
+      }
+    } catch (error) {
+      debugPrint('Error: $error');
+    }
+  }
+
+
   // Future pickImageFromCamera() async {
   //   _showFishResult = false;
   //   _showCameraIcons = false;
@@ -105,6 +209,8 @@ class _FishPageState extends State<FishPage> {
     _initializeCamera();
     initPlatformState();
     getAccessToken();
+
+    fetchDropdownData();
 
     // Listen to system volume changes
     VolumeController().listener((volume) {
@@ -269,7 +375,7 @@ class _FishPageState extends State<FishPage> {
       } else {
         _showCameraIcons = true;
         if (kDebugMode) {
-          print('No image selected.');
+          debugPrint('No image selected.');
         }
       }
     });
@@ -395,7 +501,7 @@ class _FishPageState extends State<FishPage> {
         }
 
         // Start the timer
-        _timer = Timer(const Duration(seconds: 7), () {
+        _timer = Timer(const Duration(seconds: 30), () {
           // Reset the necessary flags and variables to return to the camera page
           setState(() {
             _showFishResult = false;
@@ -478,10 +584,15 @@ class _FishPageState extends State<FishPage> {
     if (resultImage.isNotEmpty) {
       List<int> decodedImage = base64Decode(resultImage);
       Uint8List uint8List = Uint8List.fromList(decodedImage);
-      return Image.memory(uint8List);
+      return SizedBox(
+        width: 500, // Adjust the width as needed
+        height: 500, // Adjust the height as needed
+        child: Image.memory(uint8List, fit: BoxFit.contain), // Use BoxFit.cover to maintain aspect ratio
+      );
     }
     return const SizedBox.shrink(); // Return an empty SizedBox if the image is empty
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -495,12 +606,10 @@ class _FishPageState extends State<FishPage> {
         // crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (_showFishResult) ...[
-            Expanded(
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height / 3,
-                child: buildImageWidget(), // Display the decoded image widget
-              ),
+            SizedBox(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height / 3,
+              child: buildImageWidget(), // Display the decoded image widget
             ),
           ],
 
@@ -569,9 +678,9 @@ class _FishPageState extends State<FishPage> {
                         ),
                       ),
                     ),
-                    // const SizedBox(
-                    //   height: 10,
-                    // ),
+                    const SizedBox(
+                      height: 10,
+                    ),
                     // ClipRRect(
                     //   borderRadius: BorderRadius.circular(100),
                     //   child: MaterialButton(
@@ -644,7 +753,7 @@ class _FishPageState extends State<FishPage> {
                       Text(
                         'Fish Detected : $numberOfFishes',
                         style: const TextStyle(
-                          fontSize: 25.0,
+                          fontSize: 20.0,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -660,7 +769,7 @@ class _FishPageState extends State<FishPage> {
                         'Good Fishes : $goodFishes',
                         style: const TextStyle(
                           color: Colors.green,
-                          fontSize: 25.0,
+                          fontSize: 20.0,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -676,12 +785,101 @@ class _FishPageState extends State<FishPage> {
                         'Bad Fishes : $badFishes',
                         style: const TextStyle(
                           color: Colors.red,
-                          fontSize: 25.0,
+                          fontSize: 20.0,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
                   ),
+                  const SizedBox(height: 6,),
+                  Container(
+                    height: 55, // Adjust the height as needed
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey), // Add a border
+                      borderRadius: BorderRadius.circular(5), // Add some border radius
+                    ),
+                    child: DropdownButton<String>(
+                      value: selectedOption,
+                      underline: Container(), // Remove the default underline
+                      items: dropdownItems.map((String item) {
+                        return DropdownMenuItem<String>(
+                          value: item,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 0),
+                            child: Text(
+                              item,
+                              style: const TextStyle(
+                                fontSize: 12, // Adjust the font size as needed
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          selectedOption = newValue;
+                        });
+                      },
+                    ),
+                  ),
+                  // Dropdown for "InspectionValuationResult"
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        'InspectionValuationResult:',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      const SizedBox(width: 10),
+                      DropdownButton<String>(
+                        value: selectedInspectionValuationResult,
+                        items: const [
+                          DropdownMenuItem<String>(
+                            value: 'A',
+                            child: Text('Accept'),
+                          ),
+                          DropdownMenuItem<String>(
+                            value: 'R',
+                            child: Text('Reject'),
+                          ),
+                        ],
+                        onChanged: (String? newValue) {
+                          if (newValue != null) {
+                            setState(() {
+                              selectedInspectionValuationResult = newValue;
+                            });
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center, // Align items in the center horizontally
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          getLatestData();
+                        },
+                        child: const Row(
+                          children: [
+                            Icon(Icons.refresh),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      ElevatedButton(
+                        onPressed: () {
+                          makePostRequest(selectedOption!);
+                        },
+                        child: const Row(
+                          children: [
+                            Text("Upload"),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+
                   // const SizedBox(
                   //   height: 10,
                   // ),
